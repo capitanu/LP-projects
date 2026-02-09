@@ -69,13 +69,13 @@ cat("  Without HD: ", median_iqr(without_hd$age), "\n")
 age_test <- wilcox.test(age ~ heart_disease, data = data)
 cat("  P-value:    ", format.pval(age_test$p.value, digits = 3), "\n\n")
 
-# --- Smoking (replacing Female since no sex variable exists) ---
-cat("Smoking, n (%):\n")
-cat("  With HD:    ", n_pct(with_hd$smoking_status), "\n")
-cat("  Without HD: ", n_pct(without_hd$smoking_status), "\n")
-smoking_table <- table(data$heart_disease, data$smoking_status)
-smoking_test <- chisq.test(smoking_table)
-cat("  P-value:    ", format.pval(smoking_test$p.value, digits = 3), "\n\n")
+# --- Family History of Heart Disease ---
+cat("Family History of Heart Disease, n (%):\n")
+cat("  With HD:    ", n_pct(with_hd$family_history), "\n")
+cat("  Without HD: ", n_pct(without_hd$family_history), "\n")
+fh_table <- table(data$heart_disease, data$family_history)
+fh_test <- chisq.test(fh_table)
+cat("  P-value:    ", format.pval(fh_test$p.value, digits = 3), "\n\n")
 
 # --- Comorbidities ---
 cat("Comorbidities:\n")
@@ -271,7 +271,7 @@ cat("===========================================================================
 # Variabila de interes: ldl_high (LDL >= median, dihotomială) - 1 g.d.l.
 # Variabile de ajustare selectate:
 # - age: factor de risc major cardiovascular, variabilă cantitativă - 1 g.d.l.
-# - smoking_status: factor de risc comportamental - 1 g.d.l.
+# - family_history: istoric familial de boală cardiacă - 1 g.d.l.
 # - hypertension: comorbiditate majoră CV - 1 g.d.l.
 # - diabetes: comorbiditate metabolică - 1 g.d.l.
 # - obesity: factor de risc metabolic - 1 g.d.l.
@@ -285,12 +285,12 @@ cat("- Variabila de interes: LDL >= median (dihotomială)\n")
 cat("- Variabile de ajustare selectate pe baza relevanței clinice\n")
 cat("  și a numărului de grade de libertate disponibile:\n")
 cat("  min(110, 890) / 10 ≈ 11 grade de libertate permise\n")
-cat("- Variabile: age, smoking_status, hypertension, diabetes,\n")
+cat("- Variabile: age, family_history, hypertension, diabetes,\n")
 cat("  obesity, systolic_bp, hdl, triglycerides\n")
 cat("  Total: 9 g.d.l. (< 11 permise)\n\n")
 
 # Modelul multivariat
-multi_model <- glm(heart_disease ~ ldl_high + age + smoking_status +
+multi_model <- glm(heart_disease ~ ldl_high + age + family_history +
                      hypertension + diabetes + obesity +
                      systolic_bp + hdl + triglycerides,
                    data = data, family = binomial)
@@ -339,7 +339,7 @@ for (v in cont_vars) {
 }
 
 bt_formula <- as.formula(paste(
-  "heart_disease ~ ldl_high + age + smoking_status + hypertension + diabetes + obesity +",
+  "heart_disease ~ ldl_high + age + family_history + hypertension + diabetes + obesity +",
   "systolic_bp + hdl + triglycerides +",
   "age_log + systolic_bp_log + hdl_log + triglycerides_log"
 ))
@@ -426,9 +426,9 @@ cat(sprintf("Heart disease: With (n=%d), Without (n=%d)\n", nrow(with_hd), nrow(
 cat(sprintf("Age: With=%s, Without=%s, p=%s\n",
             median_iqr(with_hd$age), median_iqr(without_hd$age),
             format.pval(age_test$p.value, digits = 3)))
-cat(sprintf("Smoking: With=%s, Without=%s, p=%s\n",
-            n_pct(with_hd$smoking_status), n_pct(without_hd$smoking_status),
-            format.pval(smoking_test$p.value, digits = 3)))
+cat(sprintf("Family History: With=%s, Without=%s, p=%s\n",
+            n_pct(with_hd$family_history), n_pct(without_hd$family_history),
+            format.pval(fh_test$p.value, digits = 3)))
 cat(sprintf("Hypertension: With=%s, Without=%s, p=%s\n",
             n_pct(with_hd$hypertension), n_pct(without_hd$hypertension),
             format.pval(ht_test$p.value, digits = 3)))

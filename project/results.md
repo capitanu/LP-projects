@@ -9,7 +9,7 @@
 
 ### Statistical analyses
 
-Analiza statistică a fost realizată utilizând limbajul R (versiunea 4.5.2). Variabilele cantitative au fost testate pentru normalitate și, fiind non-normal distribuite, au fost prezentate ca mediană și interval intercuartilic (IQR). Variabilele categoriale au fost prezentate ca frecvențe absolute și relative (%). Comparațiile între grupuri au fost efectuate utilizând testul Mann-Whitney U (Wilcoxon rank-sum) pentru variabilele cantitative și testul Chi-pătrat pentru variabilele categoriale. Capacitatea discriminativă a variabilelor a fost evaluată prin analiza curbelor ROC (Receiver Operating Characteristic), cu determinarea AUC (Area Under the Curve) și a intervalelor de încredere de 95%. Punctul optim de clasificare (cut-off) a fost determinat prin metoda Youden. Regresiile logistice univariate au fost utilizate pentru estimarea odds ratio (OR) neajustat. Modelul de regresie logistică multivariată a fost construit cu variabila de interes LDL (dichotomizată la mediană) și ajustat pentru variabile selectate pe baza relevanței clinice, respectând limita de grade de libertate disponibile (min(110, 890)/10 ≈ 11). Condițiile de aplicare au fost verificate prin testul Hosmer-Lemeshow (goodness-of-fit), VIF (multicolinearitate), testul Box-Tidwell (liniaritate în logit) și distanța Cook (observații influente). Pragul de semnificație statistică a fost stabilit la p < 0.05.
+Analiza statistică a fost realizată utilizând limbajul R (versiunea 4.5.2). Variabilele cantitative au fost testate pentru normalitate și, fiind non-normal distribuite, au fost prezentate ca mediană și interval intercuartilic (IQR). Variabilele categoriale au fost prezentate ca frecvențe absolute și relative (%). Comparațiile între grupuri au fost efectuate utilizând testul Mann-Whitney U (Wilcoxon rank-sum) pentru variabilele cantitative și testul Chi-pătrat pentru variabilele categoriale. Capacitatea discriminativă a variabilelor a fost evaluată prin analiza curbelor ROC (Receiver Operating Characteristic), cu determinarea AUC (Area Under the Curve) și a intervalelor de încredere de 95%. Punctul optim de clasificare (cut-off) a fost determinat prin metoda Youden. Regresiile logistice univariate au fost utilizate pentru estimarea odds ratio (OR) neajustat. Modelul de regresie logistică multivariată a fost construit cu variabila de interes LDL (dichotomizată la mediană) și ajustat pentru variabile selectate pe baza relevanței clinice (vârstă, istoric familial de boală cardiacă, hipertensiune, diabet, obezitate, tensiune arterială sistolică, HDL, trigliceride), respectând limita de grade de libertate disponibile (min(110, 890)/10 ≈ 11). Condițiile de aplicare au fost verificate prin testul Hosmer-Lemeshow (goodness-of-fit), VIF (multicolinearitate), testul Box-Tidwell (liniaritate în logit) și distanța Cook (observații influente). Pragul de semnificație statistică a fost stabilit la p < 0.05.
 
 ---
 
@@ -22,7 +22,7 @@ IQR, interquartile range
 | Heart disease                     | With (n=110)          | Without (n=890)       | P      |
 |-----------------------------------|-----------------------|-----------------------|--------|
 | Age (years), median (IQR)         | 52.0 (37.0 - 75.8)    | 53.0 (39.0 - 74.0)    | 0.959  |
-| Smoking, n (%)                    | 52 (47.3%)            | 255 (28.7%)           | <0.001 |
+| Family History, n (%)             | 43 (39.1%)            | 204 (22.9%)           | <0.001 |
 | **Comorbidities, n (%)**          |                       |                       |        |
 | &emsp;hypertension                | 50 (45.5%)            | 337 (37.9%)           | 0.15   |
 | &emsp;diabetes                    | 24 (21.8%)            | 161 (18.1%)           | 0.412  |
@@ -31,7 +31,7 @@ IQR, interquartile range
 | &emsp;LDL cholesterol (mg/dL)     | 154.2 (134.2 - 171.3) | 127.6 (112.9 - 145.1) | <0.001 |
 | &emsp;Ferritin (ng/mL)            | 95.0 (70.0 - 138.2)   | 101.0 (71.0 - 142.8)  | 0.592  |
 
-**Interpretare:** Pacienții cu boală cardiacă au prezentat un nivel semnificativ mai ridicat de colesterol LDL comparativ cu cei fără boală cardiacă (mediană 154.2 vs. 127.6 mg/dL, p < 0.001). De asemenea, fumatul a fost semnificativ mai frecvent în grupul cu boală cardiacă (47.3% vs. 28.7%, p < 0.001). Nu s-au observat diferențe semnificative statistic pentru vârstă (p = 0.959), feritină (p = 0.592), hipertensiune (p = 0.15), diabet (p = 0.412) sau obezitate (p = 0.109).
+**Interpretare:** Pacienții cu boală cardiacă au prezentat un nivel semnificativ mai ridicat de colesterol LDL comparativ cu cei fără boală cardiacă (mediană 154.2 vs. 127.6 mg/dL, p < 0.001). De asemenea, istoricul familial de boală cardiacă a fost semnificativ mai frecvent în grupul cu boală cardiacă (39.1% vs. 22.9%, p < 0.001). Nu s-au observat diferențe semnificative statistic pentru vârstă (p = 0.959), feritină (p = 0.592), hipertensiune (p = 0.15), diabet (p = 0.412) sau obezitate (p = 0.109).
 
 ---
 
@@ -95,7 +95,7 @@ OR, odds ratio; CI, confidence interval
 | **Model 2 - PLR**                    |               |                 |        |
 | &emsp;LDL (as quantitative variable) | 1.035         | (1.027 - 1.043) | <0.001 |
 
-**Interpretare:** În analiza univariată, variabilele semnificativ asociate cu boala cardiacă au fost: fumatul (OR = 2.23, p < 0.001), colesterolul LDL (OR = 1.035 per mg/dL, p < 0.001), istoricul familial (OR = 2.16, p < 0.001), stresul crescut (OR = 1.67, p = 0.012), HDL (OR = 1.03, p < 0.001). LDL dichotomizat la mediană (≥ 129.2 mg/dL) a fost puternic asociat cu boala cardiacă (OR = 4.92, p < 0.001), indicând că pacienții cu LDL peste mediană au de aproape 5 ori mai mari șansele de a avea boală cardiacă. Feritina nu a fost asociată semnificativ cu boala cardiacă (OR = 1.000, p = 0.991).
+**Interpretare:** În analiza univariată, variabilele semnificativ asociate cu boala cardiacă au fost: istoricul familial de boală cardiacă (OR = 2.16, p < 0.001), colesterolul LDL (OR = 1.035 per mg/dL, p < 0.001), fumatul (OR = 2.23, p < 0.001), stresul crescut (OR = 1.67, p = 0.012), HDL (OR = 1.03, p < 0.001). LDL dichotomizat la mediană (≥ 129.2 mg/dL) a fost puternic asociat cu boala cardiacă (OR = 4.92, p < 0.001), indicând că pacienții cu LDL peste mediană au de aproape 5 ori mai mari șansele de a avea boală cardiacă. Feritina nu a fost asociată semnificativ cu boala cardiacă (OR = 1.000, p = 0.991).
 
 ---
 
@@ -107,7 +107,7 @@ Modelul de regresie logistică multivariată a fost construit respectând limita
 
 - **LDL >= median** (variabila de interes, dichotomială) - 1 g.d.l.
 - **age** (factor de risc major cardiovascular) - 1 g.d.l.
-- **smoking_status** (factor de risc comportamental) - 1 g.d.l.
+- **family_history** (istoric familial de boală cardiacă) - 1 g.d.l.
 - **hypertension** (comorbiditate majoră CV) - 1 g.d.l.
 - **diabetes** (comorbiditate metabolică) - 1 g.d.l.
 - **obesity** (factor de risc metabolic) - 1 g.d.l.
@@ -116,34 +116,34 @@ Modelul de regresie logistică multivariată a fost construit respectând limita
 - **triglycerides** (marker metabolic) - 1 g.d.l.
 - **Total: 9 g.d.l. (< 11 permise)**
 
-| Variable      | OR adjusted | 95% CI           | p      |
-|---------------|-------------|------------------|--------|
-| LDL >= median | 5.880       | (3.586 - 10.072) | <0.001 |
-| age           | 1.002       | (0.995 - 1.008)  | 0.614  |
-| smoking       | 2.677       | (1.733 - 4.144)  | <0.001 |
-| hypertension  | 1.321       | (0.859 - 2.023)  | 0.202  |
-| diabetes      | 1.352       | (0.790 - 2.249)  | 0.257  |
-| obesity       | 1.389       | (0.882 - 2.162)  | 0.150  |
-| systolic_bp   | 1.004       | (0.994 - 1.013)  | 0.447  |
-| hdl           | 1.029       | (1.012 - 1.046)  | <0.001 |
-| triglycerides | 0.997       | (0.992 - 1.002)  | 0.221  |
+| Variable       | OR adjusted | 95% CI           | p      |
+|----------------|-------------|------------------|--------|
+| LDL >= median  | 5.725       | (3.497 - 9.791)  | <0.001 |
+| age            | 1.003       | (0.996 - 1.009)  | 0.364  |
+| family_history | 2.295       | (1.469 - 3.565)  | <0.001 |
+| hypertension   | 1.321       | (0.861 - 2.020)  | 0.200  |
+| diabetes       | 1.468       | (0.860 - 2.435)  | 0.147  |
+| obesity        | 1.409       | (0.896 - 2.191)  | 0.132  |
+| systolic_bp    | 1.004       | (0.994 - 1.013)  | 0.462  |
+| hdl            | 1.024       | (1.008 - 1.041)  | 0.004  |
+| triglycerides  | 0.997       | (0.992 - 1.001)  | 0.162  |
 
 **Verificarea condițiilor de aplicare:**
 
-1. **Hosmer-Lemeshow test:** Chi-squared = 3.36, df = 8, p = 0.910. Modelul se potrivește bine pe date (p > 0.05).
-2. **Multicolinearitate (VIF):** Toate valorile VIF < 2 (max = 1.64 pentru HDL). Nu există multicolinearitate.
+1. **Hosmer-Lemeshow test:** Chi-squared = 8.89, df = 8, p = 0.352. Modelul se potrivește bine pe date (p > 0.05).
+2. **Multicolinearitate (VIF):** Toate valorile VIF < 2 (max = 1.65 pentru HDL). Nu există multicolinearitate.
 3. **Liniaritate în logit (Box-Tidwell):** Toate variabilele continue respectă condiția de liniaritate (p > 0.05), cu excepția trigliceridelor care prezintă o ușoară non-liniaritate marginală (p = 0.04).
-4. **Observații influente (Cook's Distance):** 99 observații cu Cook's D > 4/n, dar niciuna cu valori extreme care ar necesita excludere.
-5. **Capacitatea discriminativă:** AUC = 0.775 (95% CI: 0.731 - 0.819) - discriminare acceptabilă.
-6. **Pseudo R² Nagelkerke:** 0.199
+4. **Observații influente (Cook's Distance):** 92 observații cu Cook's D > 4/n, dar niciuna cu valori extreme care ar necesita excludere.
+5. **Capacitatea discriminativă:** AUC = 0.764 (95% CI: 0.719 - 0.810) - discriminare acceptabilă.
+6. **Pseudo R² Nagelkerke:** 0.188
 
-**Interpretare Table 4:** În modelul multivariat, LDL ≥ mediană rămâne cel mai puternic predictor independent al bolii cardiace (OR ajustat = 5.88, 95% CI: 3.59 - 10.07, p < 0.001), ceea ce înseamnă că pacienții cu LDL peste mediană au de aproape 6 ori mai mari șansele de a prezenta boală cardiacă, independent de ceilalți factori din model. Fumatul este al doilea predictor semnificativ (OR = 2.68, p < 0.001), iar HDL colesterol este de asemenea semnificativ asociat (OR = 1.03 per mg/dL, p < 0.001). Celelalte variabile (vârsta, hipertensiunea, diabetul, obezitatea, tensiunea sistolică, trigliceridele) nu au atins pragul de semnificație statistică în modelul multivariat.
+**Interpretare Table 4:** În modelul multivariat, LDL ≥ mediană rămâne cel mai puternic predictor independent al bolii cardiace (OR ajustat = 5.73, 95% CI: 3.50 - 9.79, p < 0.001), ceea ce înseamnă că pacienții cu LDL peste mediană au de aproape 6 ori mai mari șansele de a prezenta boală cardiacă, independent de ceilalți factori din model. Istoricul familial de boală cardiacă este al doilea predictor semnificativ (OR = 2.30, 95% CI: 1.47 - 3.57, p < 0.001), iar HDL colesterol este de asemenea semnificativ asociat (OR = 1.02 per mg/dL, p = 0.004). Celelalte variabile (vârsta, hipertensiunea, diabetul, obezitatea, tensiunea sistolică, trigliceridele) nu au atins pragul de semnificație statistică în modelul multivariat.
 
 ---
 
 ## Concluzie
 
-Colesterolul LDL reprezintă un predictor semnificativ și puternic al bolii cardiace, atât în analiza univariată (OR = 4.92 pentru LDL ≥ mediană), cât și în modelul multivariat ajustat (OR = 5.88). Capacitatea sa discriminativă, evaluată prin curba ROC, este acceptabilă (AUC = 0.737), cu un cut-off optim de 138.9 mg/dL. În contrast, feritina nu prezintă nicio asociere semnificativă cu boala cardiacă (AUC = 0.516, OR = 1.00, p = 0.991), demonstrând lipsa capacității discriminative. Modelul multivariat, care include LDL dichotomizat, fumatul și HDL ca predictori semnificativi, prezintă o capacitate discriminativă acceptabilă (AUC = 0.775) și se potrivește bine pe date (Hosmer-Lemeshow p = 0.91), cu absența multicolinearității (VIF < 2) și liniaritate în logit confirmată pentru variabilele continue.
+Colesterolul LDL reprezintă un predictor semnificativ și puternic al bolii cardiace, atât în analiza univariată (OR = 4.92 pentru LDL ≥ mediană), cât și în modelul multivariat ajustat (OR = 5.73). Capacitatea sa discriminativă, evaluată prin curba ROC, este acceptabilă (AUC = 0.737), cu un cut-off optim de 138.9 mg/dL. În contrast, feritina nu prezintă nicio asociere semnificativă cu boala cardiacă (AUC = 0.516, OR = 1.00, p = 0.991), demonstrând lipsa capacității discriminative. Modelul multivariat, care include LDL dichotomizat, istoricul familial de boală cardiacă și HDL ca predictori semnificativi, prezintă o capacitate discriminativă acceptabilă (AUC = 0.764) și se potrivește bine pe date (Hosmer-Lemeshow p = 0.352), cu absența multicolinearității (VIF < 2) și liniaritate în logit confirmată pentru variabilele continue.
 
 ---
 
@@ -208,8 +208,8 @@ n_pct <- function(x, level = "1") {
 # Age
 wilcox.test(age ~ heart_disease, data = data)
 
-# Smoking
-chisq.test(table(data$heart_disease, data$smoking_status))
+# Family History
+chisq.test(table(data$heart_disease, data$family_history))
 
 # Comorbidities
 chisq.test(table(data$heart_disease, data$hypertension))
@@ -285,7 +285,7 @@ tidy(model2, conf.int = TRUE, exponentiate = TRUE)
 # TABLE 4: Multivariate Logistic Regression
 # =============================================================================
 
-multi_model <- glm(heart_disease ~ ldl_high + age + smoking_status +
+multi_model <- glm(heart_disease ~ ldl_high + age + family_history +
                      hypertension + diabetes + obesity +
                      systolic_bp + hdl + triglycerides,
                    data = data, family = binomial)
@@ -303,7 +303,7 @@ data$systolic_bp_log <- data$systolic_bp * log(data$systolic_bp)
 data$hdl_log <- data$hdl * log(data$hdl)
 data$triglycerides_log <- data$triglycerides * log(data$triglycerides)
 
-bt_model <- glm(heart_disease ~ ldl_high + age + smoking_status +
+bt_model <- glm(heart_disease ~ ldl_high + age + family_history +
                   hypertension + diabetes + obesity +
                   systolic_bp + hdl + triglycerides +
                   age_log + systolic_bp_log + hdl_log + triglycerides_log,
@@ -330,7 +330,7 @@ Fără boală cardiacă: n = 890
 
 TABLE 1:
 Age: With=52.0 (37.0 - 75.8), Without=53.0 (39.0 - 74.0), p=0.959
-Smoking: With=52 (47.3%), Without=255 (28.7%), p=0.000102
+Family History: With=43 (39.1%), Without=204 (22.9%), p=0.000327
 Hypertension: With=50 (45.5%), Without=337 (37.9%), p=0.15
 Diabetes: With=24 (21.8%), Without=161 (18.1%), p=0.412
 Obesity: With=39 (35.5%), Without=246 (27.6%), p=0.109
@@ -368,29 +368,29 @@ Model 2 - PLR (LDL cantitativ): OR=1.035 (1.027-1.043), p=<2e-16
 
 TABLE 4 (Multivariate):
 Call:
-glm(formula = heart_disease ~ ldl_high + age + smoking_status +
+glm(formula = heart_disease ~ ldl_high + age + family_history +
     hypertension + diabetes + obesity + systolic_bp + hdl + triglycerides,
     family = binomial, data = data)
 
 Coefficients:
                  Estimate Std. Error z value Pr(>|z|)
-(Intercept)     -5.238685   0.984158  -5.323 1.02e-07 ***
-ldl_high1        1.771505   0.262317   6.753 1.45e-11 ***
-age              0.001603   0.003178   0.504 0.613983
-smoking_status1  0.984841   0.221967   4.437 9.13e-06 ***
-hypertension1    0.278193   0.217947   1.276 0.201805
-diabetes1        0.301511   0.265997   1.134 0.257000
-obesity1         0.328441   0.228068   1.440 0.149839
-systolic_bp      0.003719   0.004892   0.760 0.447158
-hdl              0.028601   0.008423   3.396 0.000685 ***
-triglycerides   -0.002875   0.002348  -1.224 0.220823
+(Intercept)     -4.942039   0.974185  -5.073 3.92e-07 ***
+ldl_high1        1.744782   0.261513   6.672 2.53e-11 ***
+age              0.002870   0.003165   0.907 0.364430
+family_history1  0.830924   0.225588   3.683 0.000230 ***
+hypertension1    0.278261   0.217066   1.282 0.199870
+diabetes1        0.383765   0.264357   1.452 0.146590
+obesity1         0.342875   0.227634   1.506 0.132000
+systolic_bp      0.003628   0.004937   0.735 0.462430
+hdl              0.024119   0.008287   2.910 0.003610 **
+triglycerides   -0.003292   0.002352  -1.400 0.161580
 
 Null deviance: 693.03  on 999  degrees of freedom
-Residual deviance: 588.05  on 990  degrees of freedom
-AIC: 608.05
+Residual deviance: 594.44  on 990  degrees of freedom
+AIC: 614.44
 
-Hosmer-Lemeshow: X-squared = 3.3601, df = 8, p-value = 0.9098
-VIF: all < 2 (max = 1.64)
-AUC model: 0.775 (0.731 - 0.819)
-Nagelkerke R²: 0.199
+Hosmer-Lemeshow: X-squared = 8.8922, df = 8, p-value = 0.3515
+VIF: all < 2 (max = 1.65)
+AUC model: 0.764 (0.719 - 0.810)
+Nagelkerke R²: 0.188
 ```
