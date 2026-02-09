@@ -195,15 +195,17 @@ Grosimea medie intima-media carotidiană este de 1.757 mm (SD = 0.439), cu o dis
 
 ### Tabelul 2 - Regresie multiplă fără interacțiune
 
-| Variabilă | B | SE | IC 95% inf | IC 95% sup | t(df) | p-value |
-|---|---|---|---|---|---|---|
-| (Intercept) | 0.1036 | 0.1217 | -0.1364 | 0.3436 | 0.8508(207) | 0.3959 |
-| Varsta_ani | 0.0271 | 0.0018 | 0.0235 | 0.0307 | 14.6865(207) | < 2.2e-16 |
-| Gen | 0.0240 | 0.0434 | -0.0615 | 0.1095 | 0.5536(207) | 0.5804 |
-| Durata_bolii_ani | 0.0039 | 0.0023 | -0.0007 | 0.0084 | 1.6734(207) | 0.0958 |
-| Med_antireumatice | 0.0411 | 0.0491 | -0.0557 | 0.1379 | 0.8370(207) | 0.4035 |
-| Med_antiinfl_nesteroid | 0.0242 | 0.0420 | -0.0585 | 0.1069 | 0.5767(207) | 0.5648 |
-| Corticosteroizi | 0.0086 | 0.0425 | -0.0753 | 0.0924 | 0.2012(207) | 0.8407 |
+| Variabilă | B | SE | IC 95% inf | IC 95% sup | Beta | t(df) | p-value |
+|---|---|---|---|---|---|---|---|
+| (Intercept) | 0.1036 | 0.1217 | -0.1364 | 0.3436 | - | 0.8508(207) | 0.3959 |
+| Varsta_ani | 0.0271 | 0.0018 | 0.0235 | 0.0307 | 0.7225 | 14.6865(207) | < 2.2e-16 |
+| Gen | 0.0240 | 0.0434 | -0.0615 | 0.1095 | 0.0273 | 0.5536(207) | 0.5804 |
+| Durata_bolii_ani | 0.0039 | 0.0023 | -0.0007 | 0.0084 | 0.0806 | 1.6734(207) | 0.0958 |
+| Med_antireumatice | 0.0411 | 0.0491 | -0.0557 | 0.1379 | 0.0405 | 0.8370(207) | 0.4035 |
+| Med_antiinfl_nesteroid | 0.0242 | 0.0420 | -0.0585 | 0.1069 | 0.0276 | 0.5767(207) | 0.5648 |
+| Corticosteroizi | 0.0086 | 0.0425 | -0.0753 | 0.0924 | 0.0097 | 0.2012(207) | 0.8407 |
+
+**Coeficienți standardizați (Beta):** Vârsta are de departe cea mai mare influență standardizată (Beta = 0.7225), toate celelalte variabile având efecte neglijabile (Beta < 0.09).
 
 **Interpretare:** Singura variabilă semnificativă statistic în modelul multiplu ajustat este **Vârsta** (B = 0.0271, p < 0.001). Genul devine nesemnificativ (p = 0.58) după ajustarea pentru celelalte variabile, sugerând că asocierea bivariată gen-cGIM era confundată de vârstă.
 
@@ -285,16 +287,18 @@ Grosimea medie intima-media carotidiană este de 1.757 mm (SD = 0.439), cu o dis
 
 ### Tabelul 3 - Regresie multiplă cu interacțiune
 
-| Variabilă | B | SE | IC 95% inf | IC 95% sup | t(df) | p-value |
-|---|---|---|---|---|---|---|
-| (Intercept) | 0.3210 | 0.1545 | 0.0163 | 0.6256 | 2.0769(206) | 0.0391 |
-| Varsta_ani | 0.0233 | 0.0025 | 0.0184 | 0.0282 | 9.3776(206) | < 2.2e-16 |
-| Gen | -0.4554 | 0.2175 | -0.8843 | -0.0266 | -2.0938(206) | 0.0375 |
-| Durata_bolii_ani | 0.0040 | 0.0023 | -0.0005 | 0.0086 | 1.7613(206) | 0.0797 |
-| Med_antireumatice | 0.0345 | 0.0487 | -0.0616 | 0.1305 | 0.7074(206) | 0.4801 |
-| Med_antiinfl_nesteroid | 0.0257 | 0.0416 | -0.0563 | 0.1076 | 0.6176(206) | 0.5375 |
-| Corticosteroizi | -0.0027 | 0.0424 | -0.0863 | 0.0810 | -0.0627(206) | 0.9501 |
-| **Varsta_ani:Gen** | **0.0083** | **0.0037** | **0.0010** | **0.0155** | **2.2485(206)** | **0.0256** |
+| Variabilă | B | SE | IC 95% inf | IC 95% sup | Beta | t(df) | p-value |
+|---|---|---|---|---|---|---|---|
+| (Intercept) | 0.3210 | 0.1545 | 0.0163 | 0.6256 | - | 2.0769(206) | 0.0391 |
+| Varsta_ani | 0.0233 | 0.0025 | 0.0184 | 0.0282 | 0.6215 | 9.3776(206) | < 2.2e-16 |
+| Gen | -0.4554 | 0.2175 | -0.8843 | -0.0266 | -0.5171 | -2.0938(206) | 0.0375 |
+| Durata_bolii_ani | 0.0040 | 0.0023 | -0.0005 | 0.0086 | 0.0841 | 1.7613(206) | 0.0797 |
+| Med_antireumatice | 0.0345 | 0.0487 | -0.0616 | 0.1305 | 0.0340 | 0.7074(206) | 0.4801 |
+| Med_antiinfl_nesteroid | 0.0257 | 0.0416 | -0.0563 | 0.1076 | 0.0293 | 0.6176(206) | 0.5375 |
+| Corticosteroizi | -0.0027 | 0.0424 | -0.0863 | 0.0810 | -0.0030 | -0.0627(206) | 0.9501 |
+| **Varsta_ani:Gen** | **0.0083** | **0.0037** | **0.0010** | **0.0155** | **0.5865** | **2.2485(206)** | **0.0256** |
+
+**Coeficienți standardizați (Beta):** Vârsta rămâne cel mai important predictor (Beta = 0.6215). Termenul de interacțiune Vârstă×Gen are un efect standardizat substanțial (Beta = 0.5865), confirmând importanța sa în model.
 
 ## 4. R²
 

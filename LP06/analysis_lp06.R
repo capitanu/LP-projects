@@ -215,14 +215,21 @@ coef_q3 <- coef(s_q3)
 ci_q3 <- confint(model_q3)
 
 cat("--- Tabelul 2: Regresie multipla fara interactiune ---\n")
-cat(sprintf("%-40s %10s %10s %10s %10s %15s %15s\n",
-            "Variabila", "B", "SE", "CI_low", "CI_up", "t(df)", "p-value"))
+sd_y <- sd(data$cGIM_mm)
+cat(sprintf("%-40s %10s %10s %10s %10s %8s %15s %15s\n",
+            "Variabila", "B", "SE", "CI_low", "CI_up", "Beta", "t(df)", "p-value"))
 for (i in 1:nrow(coef_q3)) {
   tval <- sprintf("%.4f(%d)", coef_q3[i,3], model_q3$df.residual)
   pval <- format.pval(coef_q3[i,4], digits=4)
-  cat(sprintf("%-40s %10.4f %10.4f %10.4f %10.4f %15s %15s\n",
-              rownames(coef_q3)[i], coef_q3[i,1], coef_q3[i,2],
-              ci_q3[i,1], ci_q3[i,2], tval, pval))
+  vname <- rownames(coef_q3)[i]
+  if (vname == "(Intercept)") {
+    beta_val <- "-"
+  } else {
+    beta_val <- sprintf("%.4f", coef_q3[i,1] * sd(data[[vname]]) / sd_y)
+  }
+  cat(sprintf("%-40s %10.4f %10.4f %10.4f %10.4f %8s %15s %15s\n",
+              vname, coef_q3[i,1], coef_q3[i,2],
+              ci_q3[i,1], ci_q3[i,2], beta_val, tval, pval))
 }
 cat("\n")
 
@@ -320,14 +327,23 @@ coef_q4 <- coef(s_q4)
 ci_q4 <- confint(model_q4)
 
 cat("--- Tabelul 3: Regresie multipla cu interactiune ---\n")
-cat(sprintf("%-40s %10s %10s %10s %10s %15s %15s\n",
-            "Variabila", "B", "SE", "CI_low", "CI_up", "t(df)", "p-value"))
+data$Varsta_Gen <- data$Varsta_ani * data$Gen
+cat(sprintf("%-40s %10s %10s %10s %10s %8s %15s %15s\n",
+            "Variabila", "B", "SE", "CI_low", "CI_up", "Beta", "t(df)", "p-value"))
 for (i in 1:nrow(coef_q4)) {
   tval <- sprintf("%.4f(%d)", coef_q4[i,3], model_q4$df.residual)
   pval <- format.pval(coef_q4[i,4], digits=4)
-  cat(sprintf("%-40s %10.4f %10.4f %10.4f %10.4f %15s %15s\n",
-              rownames(coef_q4)[i], coef_q4[i,1], coef_q4[i,2],
-              ci_q4[i,1], ci_q4[i,2], tval, pval))
+  vname <- rownames(coef_q4)[i]
+  if (vname == "(Intercept)") {
+    beta_val <- "-"
+  } else if (vname == "Varsta_ani:Gen") {
+    beta_val <- sprintf("%.4f", coef_q4[i,1] * sd(data$Varsta_Gen) / sd_y)
+  } else {
+    beta_val <- sprintf("%.4f", coef_q4[i,1] * sd(data[[vname]]) / sd_y)
+  }
+  cat(sprintf("%-40s %10.4f %10.4f %10.4f %10.4f %8s %15s %15s\n",
+              vname, coef_q4[i,1], coef_q4[i,2],
+              ci_q4[i,1], ci_q4[i,2], beta_val, tval, pval))
 }
 cat("\n")
 

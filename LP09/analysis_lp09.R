@@ -143,14 +143,21 @@ cat("Adj R2 =", sprintf("%.4f", s_back$adj.r.squared), "\n\n")
 coef_sel <- coef(s_back)
 ci_sel <- confint(model_back)
 cat("--- Tabelul coeficientilor modelului selectat ---\n")
-cat(sprintf("%-20s %10s %10s %10s %10s %15s %15s\n",
-            "Variabila", "B", "SE", "CI_low", "CI_up", "t(df)", "p-value"))
+sd_y <- sd(data$Vit_D_conc)
+cat(sprintf("%-20s %10s %10s %10s %10s %8s %15s %15s\n",
+            "Variabila", "B", "SE", "CI_low", "CI_up", "Beta", "t(df)", "p-value"))
 for (i in 1:nrow(coef_sel)) {
   tval <- sprintf("%.4f(%d)", coef_sel[i,3], model_back$df.residual)
   pval <- format.pval(coef_sel[i,4], digits=4)
-  cat(sprintf("%-20s %10.4f %10.4f %10.4f %10.4f %15s %15s\n",
-              rownames(coef_sel)[i], coef_sel[i,1], coef_sel[i,2],
-              ci_sel[i,1], ci_sel[i,2], tval, pval))
+  vname <- rownames(coef_sel)[i]
+  if (vname == "(Intercept)") {
+    beta_val <- "-"
+  } else {
+    beta_val <- sprintf("%.4f", coef_sel[i,1] * sd(data[[vname]]) / sd_y)
+  }
+  cat(sprintf("%-20s %10.4f %10.4f %10.4f %10.4f %8s %15s %15s\n",
+              vname, coef_sel[i,1], coef_sel[i,2],
+              ci_sel[i,1], ci_sel[i,2], beta_val, tval, pval))
 }
 cat("\n")
 
@@ -227,14 +234,21 @@ cat("\n")
 coef_train <- coef(s_train)
 ci_train <- confint(model_train)
 cat("--- Tabelul coeficientilor (set antrenare) ---\n")
-cat(sprintf("%-20s %10s %10s %10s %10s %15s %15s\n",
-            "Variabila", "B", "SE", "CI_low", "CI_up", "t(df)", "p-value"))
+sd_y_train <- sd(train_data$Vit_D_conc)
+cat(sprintf("%-20s %10s %10s %10s %10s %8s %15s %15s\n",
+            "Variabila", "B", "SE", "CI_low", "CI_up", "Beta", "t(df)", "p-value"))
 for (i in 1:nrow(coef_train)) {
   tval <- sprintf("%.4f(%d)", coef_train[i,3], model_train$df.residual)
   pval <- format.pval(coef_train[i,4], digits=4)
-  cat(sprintf("%-20s %10.4f %10.4f %10.4f %10.4f %15s %15s\n",
-              rownames(coef_train)[i], coef_train[i,1], coef_train[i,2],
-              ci_train[i,1], ci_train[i,2], tval, pval))
+  vname <- rownames(coef_train)[i]
+  if (vname == "(Intercept)") {
+    beta_val <- "-"
+  } else {
+    beta_val <- sprintf("%.4f", coef_train[i,1] * sd(train_data[[vname]]) / sd_y_train)
+  }
+  cat(sprintf("%-20s %10.4f %10.4f %10.4f %10.4f %8s %15s %15s\n",
+              vname, coef_train[i,1], coef_train[i,2],
+              ci_train[i,1], ci_train[i,2], beta_val, tval, pval))
 }
 cat("\n")
 
