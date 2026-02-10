@@ -219,6 +219,42 @@ Toate asumpțiile modelului de regresie sunt satisfăcute: normalitatea reziduur
 
 ---
 
+## Identificarea/interpretarea analizei de regresie liniară din articole științifice medicale
+
+### Articol identificat:
+
+**Titlu:** Anthropometry Versus Imaging for Prediction of Inflammation Among Hispanic Girls
+
+**URL:** https://pubmed.ncbi.nlm.nih.gov/30277029/
+
+**Autori:** Bea JW, Funk J, et al. (2018). Journal of Clinical Immunology.
+
+### Obiectivul studiului:
+
+Compararea diferitelor metode de măsurare a compoziției corporale (antropometrie vs imagistică) în predicția inflamației (CRP) la fetele de origine hispanică (n = 232, vârsta 9-12 ani).
+
+### Descrierea analizei de regresie:
+
+- **VD:** Proteina C reactivă (CRP, mg/L) — **transformată logaritmic** (log-CRP), deoarece CRP are o distribuție puternic asimetrică pozitivă (skewed right) cu valori extreme
+- **VI (predictori):**
+  - Măsuri antropometrice: IMC, circumferința abdominală
+  - Măsuri DXA: grăsime corporală totală, grăsime regională (trunchi, android, ginoid, picior)
+  - Măsuri pQCT: grăsime intermusculară
+- **Variabile de ajustare:** maturare (stadiu pubertar), aport caloric, activitate fizică, medicație
+- **Metoda:** Regresie liniară multiplă cu log-CRP ca variabilă dependentă, pentru fiecare măsură de compoziție corporală separat, ajustând pentru covariabile
+
+### Interpretarea rezultatelor:
+
+- Toate măsurile de grăsime corporală totală și regională au avut **asocieri pozitive semnificative** cu log-CRP (p < 0.0001), cu excepția grăsimii intermusculare (pQCT)
+- Nu s-au observat diferențe clinic relevante între măsurile antropometrice (IMC, circumferința abdominală) și cele imagistice (DXA) în predicția inflamației
+- Interpretarea coeficienților pe scara log: un coeficient B pozitiv înseamnă că la creșterea măsurii de adipozitate, CRP crește multiplicativ cu factorul 10^B
+
+### Concluzia studiului:
+
+Măsurile antropometrice simple (IMC, circumferința abdominală) sunt la fel de eficiente ca metodele imagistice avansate (DXA, pQCT) în predicția inflamației sistemice (CRP) la fetele hispanice prepubertare. Transformarea logaritmică a CRP a fost necesară datorită distribuției asimetrice a acestui biomarker.
+
+---
+
 ## Cod R utilizat
 
 ```r
