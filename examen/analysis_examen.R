@@ -377,7 +377,7 @@ cat("1e. INTERPRETARE MODEL PEF\n")
 cat("===========================================================================\n\n")
 
 coef_pef <- coef(model_pef)
-cat("Coeficienti:\n")
+cat("Coeficienti nestandardizati:\n")
 cat("  Intercept (b0) =", sprintf("%.4f", coef_pef[1]),
     "=> PEF estimat cand varsta=0 si inaltime=0 (nu are sens clinic)\n")
 cat("  Varsta_ani (b1) =", sprintf("%.4f", coef_pef[2]),
@@ -388,6 +388,33 @@ cat("  Inaltime_cm (b2) =", sprintf("%.4f", coef_pef[3]),
     "=> La cresterea cu 1 cm a inaltimii,\n")
 cat("    PEF creste cu", sprintf("%.4f", coef_pef[3]),
     "L/min, controlind pentru varsta.\n\n")
+
+# Coeficienti de regresie partiala (standardizati)
+cat("--- Coeficienti de regresie partiala (standardizati) ---\n\n")
+model_pef_std <- lm(scale(PEF) ~ scale(Varsta_ani) + scale(Inaltime_cm), data=data)
+s_pef_std <- summary(model_pef_std)
+cat("Model standardizat: PEF_z ~ Varsta_z + Inaltime_z\n\n")
+print(s_pef_std)
+cat("\n")
+cat("Coeficienti standardizati (beta):\n")
+cat("  beta_Varsta =", sprintf("%.4f", coef(model_pef_std)[2]), "\n")
+cat("  beta_Inaltime =", sprintf("%.4f", coef(model_pef_std)[3]), "\n\n")
+cat("Interpretare:\n")
+cat("  La cresterea cu 1 SD a varstei (", sprintf("%.2f", sd(data$Varsta_ani)), "ani),\n")
+cat("    PEF creste cu", sprintf("%.4f", coef(model_pef_std)[2]), "SD (",
+    sprintf("%.2f", sd(data$PEF)), "L/min), controlind pentru inaltime.\n")
+cat("  La cresterea cu 1 SD a inaltimii (", sprintf("%.2f", sd(data$Inaltime_cm)), "cm),\n")
+cat("    PEF creste cu", sprintf("%.4f", coef(model_pef_std)[3]), "SD (",
+    sprintf("%.2f", sd(data$PEF)), "L/min), controlind pentru varsta.\n")
+abs_b_v <- abs(coef(model_pef_std)[2])
+abs_b_i <- abs(coef(model_pef_std)[3])
+if (abs_b_i > abs_b_v) {
+  cat("  => Inaltimea are un efect standardizat mai mare decat varsta (",
+      sprintf("%.4f", abs_b_i), "vs", sprintf("%.4f", abs_b_v), ")\n\n")
+} else {
+  cat("  => Varsta are un efect standardizat mai mare decat inaltimea (",
+      sprintf("%.4f", abs_b_v), "vs", sprintf("%.4f", abs_b_i), ")\n\n")
+}
 
 # --- 1f. Modele cu interactiuni PEF ---
 cat("===========================================================================\n")
@@ -787,7 +814,7 @@ cat("2h. INTERPRETARE MODEL log10(FEV1)\n")
 cat("===========================================================================\n\n")
 
 coef_fev <- coef(model_fev)
-cat("Coeficienti (pe scala log10):\n")
+cat("Coeficienti nestandardizati (pe scala log10):\n")
 cat("  Intercept (b0) =", sprintf("%.6f", coef_fev[1]), "\n")
 cat("  Varsta_ani (b1) =", sprintf("%.6f", coef_fev[2]), "\n")
 cat("  Inaltime_cm (b2) =", sprintf("%.6f", coef_fev[3]), "\n\n")
@@ -809,6 +836,33 @@ cat("  La cresterea cu 10 cm a inaltimii, FEV1 se multiplica cu",
     sprintf("%.4f", 10^(10*coef_fev[3])), "\n")
 pct_10cm <- (10^(10*coef_fev[3]) - 1) * 100
 cat("  Aceasta corespunde unei cresteri de", sprintf("%.2f%%", pct_10cm), "\n\n")
+
+# Coeficienti de regresie partiala (standardizati)
+cat("--- Coeficienti de regresie partiala (standardizati) ---\n\n")
+model_fev_std <- lm(scale(log_FEV1) ~ scale(Varsta_ani) + scale(Inaltime_cm), data=data)
+s_fev_std <- summary(model_fev_std)
+cat("Model standardizat: log10(FEV1)_z ~ Varsta_z + Inaltime_z\n\n")
+print(s_fev_std)
+cat("\n")
+cat("Coeficienti standardizati (beta):\n")
+cat("  beta_Varsta =", sprintf("%.4f", coef(model_fev_std)[2]), "\n")
+cat("  beta_Inaltime =", sprintf("%.4f", coef(model_fev_std)[3]), "\n\n")
+cat("Interpretare:\n")
+cat("  La cresterea cu 1 SD a varstei (", sprintf("%.2f", sd(data$Varsta_ani)), "ani),\n")
+cat("    log10(FEV1) creste cu", sprintf("%.4f", coef(model_fev_std)[2]), "SD (",
+    sprintf("%.4f", sd(data$log_FEV1)), "), controlind pentru inaltime.\n")
+cat("  La cresterea cu 1 SD a inaltimii (", sprintf("%.2f", sd(data$Inaltime_cm)), "cm),\n")
+cat("    log10(FEV1) creste cu", sprintf("%.4f", coef(model_fev_std)[3]), "SD (",
+    sprintf("%.4f", sd(data$log_FEV1)), "), controlind pentru varsta.\n")
+abs_b_v <- abs(coef(model_fev_std)[2])
+abs_b_i <- abs(coef(model_fev_std)[3])
+if (abs_b_i > abs_b_v) {
+  cat("  => Inaltimea are un efect standardizat mai mare decat varsta (",
+      sprintf("%.4f", abs_b_i), "vs", sprintf("%.4f", abs_b_v), ")\n\n")
+} else {
+  cat("  => Varsta are un efect standardizat mai mare decat inaltimea (",
+      sprintf("%.4f", abs_b_v), "vs", sprintf("%.4f", abs_b_i), ")\n\n")
+}
 
 # --- 2i. Modele cu interactiuni log10(FEV1) ---
 cat("===========================================================================\n")

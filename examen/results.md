@@ -156,10 +156,21 @@ PEF = -155.73 + 7.39 * Varsta + 1.97 * Inaltime
 - **R² ajustat = 0.4718**
 - **F(2, 97) = 45.22, p = 1.33e-14** — modelul este semnificativ global
 
-**Interpretare coeficienti:**
+**Interpretare coeficienti nestandardizati:**
 - **Varsta (b1 = 7.39):** La cresterea varstei cu 1 an, PEF creste cu 7.39 L/min, controlind pentru inaltime
 - **Inaltime (b2 = 1.97):** La cresterea inaltimii cu 1 cm, PEF creste cu 1.97 L/min, controlind pentru varsta
 - Ambii predictori sunt semnificativi (p < 0.001)
+
+**Coeficienti de regresie partiala (standardizati):**
+
+| Predictor | beta (standardizat) | SE | t | p-value |
+|-----------|--------------------|----|---|---------|
+| Varsta_ani | **0.2797** | 0.0730 | 3.829 | 0.000228 |
+| Inaltime_cm | **0.6371** | 0.0730 | 8.722 | 7.67e-14 |
+
+- **beta_Varsta = 0.2797:** La cresterea cu 1 SD a varstei (1.59 ani), PEF creste cu 0.28 SD (42.06 L/min)
+- **beta_Inaltime = 0.6371:** La cresterea cu 1 SD a inaltimii (13.59 cm), PEF creste cu 0.64 SD (42.06 L/min)
+- Inaltimea are un efect standardizat de **2.3 ori mai mare** decat varsta (0.637 vs 0.280), confirmind ca este predictorul dominant
 
 **Observatie importanta:** R² creste de la 0.4043 (doar Inaltime) la 0.4825 (Inaltime + Varsta), deci adaugarea Varstei aduce o imbunatatire de ~7.8 puncte procentuale. Acest lucru se intimpla desi Varsta si Inaltimea nu sunt corelate (r ≈ 0), ceea ce inseamna ca cele doua variabile capteaza aspecte independente ale variabilitatii PEF.
 
@@ -377,10 +388,21 @@ log10(FEV1) = -0.6282 + (-0.0003) * Varsta + 0.0064 * Inaltime
 - **R² ajustat = 0.9758**
 - **F(2, 97) = 1993.17, p < 2.2e-16** — modelul este semnificativ global
 
-**Interpretare coeficienti (pe scala log10 — back-transform):**
+**Interpretare coeficienti nestandardizati (pe scala log10 — back-transform):**
 - **Varsta (b1 = -0.0003):** La cresterea varstei cu 1 an, FEV1 se multiplica cu 0.9993 (factor multiplicativ), adica o modificare de -0.07% — practic nesemnificativa (p = 0.722)
 - **Inaltime (b2 = 0.0064):** La cresterea inaltimii cu 1 cm, FEV1 se multiplica cu 1.0149, adica o crestere de **1.49%**, controlind pentru varsta
 - La cresterea inaltimii cu **10 cm**, FEV1 se multiplica cu **1.1589** (crestere de 15.89%)
+
+**Coeficienti de regresie partiala (standardizati):**
+
+| Predictor | beta (standardizat) | SE | t | p-value |
+|-----------|--------------------|----|---|---------|
+| Varsta_ani | **-0.0056** | 0.0157 | -0.357 | 0.722 |
+| Inaltime_cm | **0.9880** | 0.0157 | 63.134 | <2e-16 |
+
+- **beta_Varsta = -0.0056:** Efectul varstei este practic zero — nesemnificativ
+- **beta_Inaltime = 0.9880:** La cresterea cu 1 SD a inaltimii (13.59 cm), log10(FEV1) creste cu 0.99 SD — inaltimea explica aproape toata variabilitatea
+- Inaltimea are un efect standardizat de **176 ori mai mare** decat varsta (0.988 vs 0.006), confirmind dominanta absoluta a inaltimii ca predictor al FEV1
 
 **Observatie:** Inaltimea ramine singurul predictor semnificativ. Varsta nu aduce informatie suplimentara (p = 0.722), ceea ce confirma ca FEV1 depinde in principal de inaltime.
 
