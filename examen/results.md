@@ -1,0 +1,614 @@
+# Examen - Regresia liniara multipla: Caracteristici demografice/antropometrice si valori spirometrice
+
+## Descrierea studiului
+
+**Tip studiu:** Transversal
+**Esantion:** 100 copii cu varste intre 7-13 ani, din 5 scoli din Cluj-Napoca
+**Obiectiv:** Testarea relatiei dintre caracteristicile demografice si antropometrice (varsta, inaltime) si valorile spirometrice (PEF, FEV1)
+
+### Variabile
+
+| Variabila | Tip | Descriere | Unitate |
+|-----------|-----|-----------|---------|
+| Gen | Calitativa dicotomica | 0 = Feminin, 1 = Masculin | - |
+| Varsta_ani | Cantitativa continua | Varsta copilului | ani |
+| Inaltime_cm | Cantitativa continua | Inaltimea copilului | cm |
+| FEV1 | Cantitativa continua (VD) | Debitul Expirator Maxim in prima secunda | L/s |
+| PEF | Cantitativa continua (VD) | Debitul Expirator Maxim de Varf | L/min |
+
+---
+
+## 1. Statistici descriptive
+
+### 1.1 Distributia pe gen
+
+| Gen | n | % |
+|-----|---|---|
+| Feminin | 53 | 53.0% |
+| Masculin | 47 | 47.0% |
+
+Esantionul este relativ echilibrat intre cele doua genuri.
+
+### 1.2 Variabile cantitative
+
+| Variabila | N | Media | Mediana | SD | Min | Max | Q1 | Q3 | IQR | Outlieri |
+|-----------|---|-------|---------|-----|-----|-----|----|----|-----|----------|
+| Varsta (ani) | 100 | 9.0830 | 9.0000 | 1.5925 | 5.00 | 13.10 | 8.20 | 10.03 | 1.83 | 2 (5.0, 13.1) |
+| Inaltime (cm) | 100 | 119.80 | 119.00 | 13.5885 | 82.00 | 158.00 | 109.75 | 130.00 | 20.25 | 0 |
+| FEV1 (L/s) | 100 | 1.3960 | 1.3800 | 0.2718 | 0.64 | 2.16 | 1.20 | 1.60 | 0.41 | 0 |
+| PEF (L/min) | 100 | 147.59 | 145.00 | 42.0582 | 70.00 | 280.00 | 119.00 | 173.50 | 54.50 | 1 (280) |
+
+**Observatii:**
+- Varsta medie a copiilor este de ~9 ani, cu o deviatie standard de 1.59 ani
+- Inaltimea medie este de ~120 cm, fara outlieri
+- PEF are un singur outlier (280 L/min), dar nu este extrem
+- FEV1 nu prezinta outlieri
+
+### 1.3 Statistici descriptive pe gen
+
+| Variabila | Feminin (n=53) | | Masculin (n=47) | |
+|-----------|----------|------|----------|------|
+| | Media | SD | Media | SD |
+| Varsta (ani) | 9.1962 | 1.6422 | 8.9553 | 1.5421 |
+| Inaltime (cm) | 120.36 | 15.09 | 119.17 | 11.80 |
+| FEV1 (L/s) | 1.4072 | 0.3018 | 1.3834 | 0.2360 |
+| PEF (L/min) | 150.62 | 43.94 | 144.17 | 40.02 |
+
+Diferentele intre genuri sunt mici si nesemnificative statistic (vezi regresiile cu Gen mai jos).
+
+---
+
+## 2. Teste de normalitate (Shapiro-Wilk)
+
+| Variabila | W | p-value | Concluzie |
+|-----------|---|---------|-----------|
+| Varsta (ani) | 0.9837 | 0.2569 | Distributie normala (p > 0.05) |
+| Inaltime (cm) | 0.9877 | 0.4865 | Distributie normala (p > 0.05) |
+| FEV1 (L/s) | 0.9877 | 0.4865 | Distributie normala (p > 0.05) |
+| PEF (L/min) | 0.9769 | 0.0766 | Distributie normala (p > 0.05) |
+
+Toate variabilele urmeaza o distributie normala (p > 0.05 la testul Shapiro-Wilk), ceea ce permite utilizarea metodelor parametrice (regresia liniara).
+
+---
+
+## 3. Matricea de corelatie Pearson
+
+|  | Varsta | Inaltime | Gen | FEV1 | PEF |
+|--|--------|----------|-----|------|-----|
+| **Varsta** | 1.0000 | -0.0045 | -0.0759 | -0.0045 | **0.2768** |
+| **Inaltime** | -0.0045 | 1.0000 | -0.0439 | **1.0000** | **0.6358** |
+| **Gen** | -0.0759 | -0.0439 | 1.0000 | -0.0439 | -0.0770 |
+| **FEV1** | -0.0045 | **1.0000** | -0.0439 | 1.0000 | **0.6358** |
+| **PEF** | **0.2768** | **0.6358** | -0.0770 | **0.6358** | 1.0000 |
+
+### Teste de semnificatie
+
+| Pereche | r | t | df | p-value | Semnificativ? |
+|---------|---|---|----|---------|----|
+| Varsta vs PEF | 0.2768 | 2.8517 | 98 | 0.0053 | **Da** |
+| Inaltime vs PEF | 0.6358 | 8.1548 | 98 | 1.18e-12 | **Da** |
+| Gen vs PEF | -0.0770 | -0.7641 | 98 | 0.4466 | Nu |
+| Varsta vs FEV1 | -0.0045 | -0.0450 | 98 | 0.9642 | Nu |
+| Inaltime vs FEV1 | **1.0000** | **Inf** | 98 | <2.2e-16 | **Da** |
+| Gen vs FEV1 | -0.0439 | -0.4347 | 98 | 0.6648 | Nu |
+| Varsta vs Inaltime | -0.0045 | -0.0450 | 98 | 0.9642 | Nu |
+
+**Observatii cheie:**
+- **PEF** se coreleaza semnificativ cu Inaltimea (r = 0.64, corelatie moderata-puternica) si cu Varsta (r = 0.28, corelatie slaba)
+- **FEV1** are o corelatie **perfecta** cu Inaltimea (r = 1.000) — FEV1 este calculat exact din Inaltime prin formula FEV1 = -1 + 0.02 * Inaltime
+- **Gen** nu se coreleaza semnificativ cu niciuna dintre variabilele spirometrice
+- **Varsta si Inaltimea** nu sunt corelate intre ele (r = -0.005), ceea ce e neobisnuit si indica probabil un esantion cu variabilitate mare la inaltime pentru fiecare varsta
+
+---
+
+## ANALIZA 1: PEF (Debitul Expirator Maxim de Varf)
+
+### 4. Regresii simple pentru PEF
+
+#### 4.1 PEF ~ Varsta
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | 81.19 | 23.64 | 3.435 | 0.00087 | [34.28, 128.09] |
+| Varsta_ani | 7.31 | 2.56 | 2.852 | **0.0053** | [2.22, 12.40] |
+
+- **R² = 0.0766** (7.7% din variabilitatea PEF explicata de varsta)
+- Asocierea este semnificativa dar slaba
+- La fiecare an in plus, PEF creste cu ~7.3 L/min
+
+#### 4.2 PEF ~ Inaltime
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | -88.17 | 29.09 | -3.030 | 0.0031 | [-145.90, -30.43] |
+| Inaltime_cm | 1.97 | 0.24 | 8.155 | **1.18e-12** | [1.49, 2.45] |
+
+- **R² = 0.4043** (40.4% din variabilitatea PEF explicata de inaltime)
+- Asocierea este puternic semnificativa
+- La fiecare cm in plus, PEF creste cu ~1.97 L/min
+- Inaltimea este cel mai bun predictor individual al PEF
+
+#### 4.3 PEF ~ Gen
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | 150.62 | 5.79 | 26.017 | <2e-16 | [139.13, 162.11] |
+| Gen | -6.45 | 8.45 | -0.764 | 0.4466 | [-23.21, 10.31] |
+
+- **R² = 0.0059** (0.6% — practic zero)
+- Genul nu este un predictor semnificativ al PEF (p = 0.45)
+
+### 5. Regresie multipla: PEF ~ Varsta + Inaltime
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | -155.73 | 32.47 | -4.796 | 5.84e-06 | [-220.18, -91.29] |
+| Varsta_ani | 7.39 | 1.93 | 3.829 | **0.000228** | [3.56, 11.22] |
+| Inaltime_cm | 1.97 | 0.23 | 8.722 | **7.67e-14** | [1.52, 2.42] |
+
+**Ecuatia de regresie:**
+```
+PEF = -155.73 + 7.39 * Varsta + 1.97 * Inaltime
+```
+
+**Performanta modelului:**
+- **R² = 0.4825** — 48.2% din variabilitatea PEF este explicata de varsta si inaltime impreuna
+- **R² ajustat = 0.4718**
+- **F(2, 97) = 45.22, p = 1.33e-14** — modelul este semnificativ global
+
+**Interpretare coeficienti:**
+- **Varsta (b1 = 7.39):** La cresterea varstei cu 1 an, PEF creste cu 7.39 L/min, controlind pentru inaltime
+- **Inaltime (b2 = 1.97):** La cresterea inaltimii cu 1 cm, PEF creste cu 1.97 L/min, controlind pentru varsta
+- Ambii predictori sunt semnificativi (p < 0.001)
+
+**Observatie importanta:** R² creste de la 0.4043 (doar Inaltime) la 0.4825 (Inaltime + Varsta), deci adaugarea Varstei aduce o imbunatatire de ~7.8 puncte procentuale. Acest lucru se intimpla desi Varsta si Inaltimea nu sunt corelate (r ≈ 0), ceea ce inseamna ca cele doua variabile capteaza aspecte independente ale variabilitatii PEF.
+
+### 6. Modelul cu Gen: PEF ~ Varsta + Inaltime + Gen
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | -153.66 | 33.07 | -4.647 | 1.07e-05 |
+| Varsta_ani | 7.33 | 1.94 | 3.772 | 0.00028 |
+| Inaltime_cm | 1.97 | 0.23 | 8.658 | 1.13e-13 |
+| Gen | -2.35 | 6.18 | -0.380 | **0.7046** |
+
+- **R² = 0.4833**, R² ajustat = 0.4671
+- **ANOVA comparativa:** F = 0.1446, p = 0.7046
+- **Concluzie:** Adaugarea genului **NU** imbunatateste semnificativ modelul. Genul nu este un predictor relevant al PEF dupa ce se controleaza pentru varsta si inaltime.
+
+### 7. Diagnostice model PEF (Varsta + Inaltime)
+
+| Test | Statistica | p-value | Concluzie |
+|------|-----------|---------|-----------|
+| Shapiro-Wilk (normalitate reziduuri) | W = 0.9746 | 0.0503 | Reziduurile sunt normal distribuite (la limita) |
+| Breusch-Pagan (homoscedasticitate) | BP = 3.8829 | 0.1435 | Homoscedasticitate respectata |
+| Durbin-Watson (independenta erorilor) | DW = 1.7959 | 0.1513 | Erorile sunt independente |
+
+**Observatii puncte influentiale:**
+- Cook's D > 4/n: 7 observatii (niciuna cu Cook's D > 0.5, maxim = 0.1562)
+- Reziduuri standardizate |> 2|: 7 observatii
+
+**VIF (Variance Inflation Factor):**
+| Variabila | VIF |
+|-----------|-----|
+| Varsta_ani | 1.000 |
+| Inaltime_cm | 1.000 |
+
+VIF ≈ 1 pentru ambii predictori — **nu exista multicoliniaritate**. Acest lucru era de asteptat dat fiind ca Varsta si Inaltimea nu sunt corelate (r = -0.005).
+
+**Concluzie diagnostice:** Toate conditiile regresiei liniare sunt indeplinite:
+1. Normalitatea reziduurilor (Shapiro-Wilk p = 0.05, la limita dar acceptabil)
+2. Homoscedasticitate (Breusch-Pagan p = 0.14)
+3. Independenta erorilor (Durbin-Watson p = 0.15)
+4. Absenta multicoliniaritatii (VIF = 1.0)
+
+---
+
+## ANALIZA 2: FEV1 (Debitul Expirator Maxim in prima secunda)
+
+### 8. Regresii simple pentru FEV1
+
+#### 8.1 FEV1 ~ Varsta
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | 1.4030 | 0.1589 | 8.828 | 4.22e-14 |
+| Varsta_ani | -0.0008 | 0.0172 | -0.045 | **0.9642** |
+
+- **R² ≈ 0.0000** — varsta nu explica deloc variabilitatea FEV1
+- Asocierea este complet nesemnificativa (p = 0.96)
+
+#### 8.2 FEV1 ~ Inaltime
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | -1.000 | ~0 | -8.45e+15 | <2e-16 |
+| Inaltime_cm | 0.020 | ~0 | 2.04e+16 | <2e-16 |
+
+- **R² = 1.0000** — FIT PERFECT
+- **Avertisment R:** "essentially perfect fit: summary may be unreliable"
+
+**Aceasta este o constatare critica:** FEV1 este calculat EXACT din Inaltime prin formula determinista:
+
+```
+FEV1 = -1 + 0.02 * Inaltime_cm
+```
+
+Aceasta nu este o relatie statistica, ci una **matematica**. FEV1 a fost probabil derivat/calculat din Inaltime in setul de date, nu masurat independent. Din acest motiv, regresia pe FEV1 nu are sens statistic real — nu testam o relatie, ci verificam o identitate matematica.
+
+#### 8.3 FEV1 ~ Gen
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | 1.4072 | 0.0375 | 37.540 | <2e-16 |
+| Gen | -0.0238 | 0.0547 | -0.435 | **0.6648** |
+
+- **R² = 0.0019** — genul nu explica variabilitatea FEV1
+- Nesemnificativ (p = 0.66)
+
+### 9. Regresie multipla: FEV1 ~ Varsta + Inaltime
+
+Din cauza relatiei deterministe FEV1 = -1 + 0.02 * Inaltime, acest model produce un fit perfect (R² = 1.0000) in care:
+- **Inaltime_cm** are coeficientul exact 0.02 (p < 2e-16)
+- **Varsta_ani** are coeficientul ~0 (p = 0.474, nesemnificativ)
+
+Modelul confirma ca intreaga variabilitate a FEV1 este explicata de Inaltime, iar Varsta nu aduce nicio informatie suplimentara (deoarece FEV1 este deja complet determinat de Inaltime).
+
+### 10. Modelul cu Gen: FEV1 ~ Varsta + Inaltime + Gen
+
+- Gen nesemnificativ (p = 0.452)
+- ANOVA comparativa: F = 0.57, p = 0.4521
+- Adaugarea genului nu imbunatateste modelul
+
+### 11. Diagnostice model FEV1
+
+| Test | Statistica | p-value | Concluzie |
+|------|-----------|---------|-----------|
+| Shapiro-Wilk | W = 0.9418 | **0.0002** | Reziduurile NU sunt normal distribuite |
+| Breusch-Pagan | BP = 1.4966 | 0.4732 | Homoscedasticitate respectata |
+| Durbin-Watson | DW = 2.4326 | 0.9852 | Erorile sunt independente |
+
+**Nota:** Diagnosticele pentru FEV1 nu sunt relevante din punct de vedere practic deoarece reziduurile sunt de ordinul 10^-16 (erori de rotunjire ale computerului, nu erori statistice reale). Testul Shapiro-Wilk esueaza pe aceste reziduuri minuscule deoarece ele reflecta precizia aritmeticii in virgula mobila, nu o adevarata abatere de la normalitate.
+
+---
+
+## Sumar general
+
+| Model | R² | R² ajustat | F | p-value |
+|-------|-----|------------|---|---------|
+| **PEF ~ Varsta + Inaltime** | **0.4825** | **0.4718** | 45.22 | 1.33e-14 |
+| FEV1 ~ Varsta + Inaltime | 1.0000 | 1.0000 | ~1.8e+32 | <2.2e-16 |
+
+### Concluzii
+
+1. **Modelul PEF** este modelul principal valid din punct de vedere statistic:
+   - 48.2% din variabilitatea PEF este explicata de varsta si inaltime impreuna
+   - Ambii predictori sunt semnificativi independent: inaltimea (p < 10^-13) si varsta (p = 0.0002)
+   - Inaltimea este predictorul dominant (R² simplu = 0.40 vs R² simplu varsta = 0.08)
+   - Genul nu aduce informatie suplimentara semnificativa
+   - Toate conditiile de validitate ale regresiei sunt indeplinite
+
+2. **Modelul FEV1** nu este valid din punct de vedere statistic deoarece FEV1 este o functie determinista a inaltimii (FEV1 = -1 + 0.02 * Inaltime_cm). Aceasta relatie perfecta (R² = 1.0) indica faptul ca FEV1 a fost probabil calculat din inaltime in setul de date, nu masurat independent prin spirometrie.
+
+3. **Genul** nu este un predictor semnificativ pentru niciunul dintre parametrii spirometrici, nici individual, nici in combinatie cu celelalte variabile.
+
+4. **Varsta si Inaltimea** sunt aproape complet necorelate in acest esantion (r = -0.005), ceea ce le face predictori ortogonali ideali in modelul multiplu — fiecare aduce informatie independenta.
+
+---
+
+## Figuri generate
+
+| Fisier | Descriere |
+|--------|-----------|
+| `boxplots_all.png` | Box-plots pentru toate variabilele cantitative |
+| `boxplots_by_gen.png` | Box-plots FEV1 si PEF pe gen |
+| `histograme.png` | Histograme cu curba normala suprapusa |
+| `scatter_plots.png` | Scatter plots (PEF/FEV1 vs Varsta/Inaltime + Inaltime vs Varsta) |
+| `pef_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul PEF |
+| `pef_hist_resid.png` | Histograma reziduurilor modelului PEF |
+| `fev1_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul FEV1 |
+| `fev1_hist_resid.png` | Histograma reziduurilor modelului FEV1 |
+
+---
+
+## Codul R
+
+Codul complet se gaseste in fisierul `analysis_examen.R`. Analiza a fost realizata in R 4.5.2, folosind pachetele `car` (VIF), `lmtest` (Breusch-Pagan, Durbin-Watson).
+
+### Output complet R
+
+```
+=== Structura datelor ===
+'data.frame':	100 obs. of  5 variables:
+ $ Gen        : int  0 1 1 0 0 1 1 0 0 0 ...
+ $ Varsta_ani : num  8.1 10 8.2 10.1 6.1 10.2 12 10.3 8.4 8.3 ...
+ $ Inaltime_cm: int  102 122 127 105 117 120 124 106 107 111 ...
+ $ FEV1       : num  1.04 1.44 1.54 1.1 1.34 1.4 1.48 1.12 1.14 1.22 ...
+ $ PEF        : int  100 160 165 130 100 140 160 128 100 160 ...
+n = 100
+
+===========================================================================
+1. STATISTICI DESCRIPTIVE
+===========================================================================
+
+--- Gen ---
+ Feminin Masculin
+      53       47
+  Feminin: 53 ( 53.0% )
+  Masculin: 47 ( 47.0% )
+
+--- Varsta (ani) ---
+  N:        100
+  NA:       0
+  Media:    9.0830
+  Mediana:  9.0000
+  SD:       1.5925
+  Min:      5.0000
+  Max:      13.1000
+  Q1:       8.2000
+  Q3:       10.0250
+  IQR:      1.8250
+  Outliers: 2
+    Valori: 5 13.1
+
+--- Inaltime (cm) ---
+  N:        100
+  NA:       0
+  Media:    119.8000
+  Mediana:  119.0000
+  SD:       13.5885
+  Min:      82.0000
+  Max:      158.0000
+  Q1:       109.7500
+  Q3:       130.0000
+  IQR:      20.2500
+  Outliers: 0
+
+--- FEV1 (L/s) ---
+  N:        100
+  NA:       0
+  Media:    1.3960
+  Mediana:  1.3800
+  SD:       0.2718
+  Min:      0.6400
+  Max:      2.1600
+  Q1:       1.1950
+  Q3:       1.6000
+  IQR:      0.4050
+  Outliers: 0
+
+--- PEF (L/min) ---
+  N:        100
+  NA:       0
+  Media:    147.5900
+  Mediana:  145.0000
+  SD:       42.0582
+  Min:      70.0000
+  Max:      280.0000
+  Q1:       119.0000
+  Q3:       173.5000
+  IQR:      54.5000
+  Outliers: 1
+    Valori: 280
+
+--- Statistici descriptive pe Gen ---
+
+  Varsta_ani la Feminin (n=53): Media=9.1962, SD=1.6422
+  Varsta_ani la Masculin (n=47): Media=8.9553, SD=1.5421
+
+  Inaltime_cm la Feminin (n=53): Media=120.3585, SD=15.0909
+  Inaltime_cm la Masculin (n=47): Media=119.1702, SD=11.7978
+
+  FEV1 la Feminin (n=53): Media=1.4072, SD=0.3018
+  FEV1 la Masculin (n=47): Media=1.3834, SD=0.2360
+
+  PEF la Feminin (n=53): Media=150.6226, SD=43.9411
+  PEF la Masculin (n=47): Media=144.1702, SD=40.0219
+
+===========================================================================
+5. TESTE DE NORMALITATE
+===========================================================================
+
+  Varsta (ani): W=0.9837, p=0.2569  => Normal
+  Inaltime (cm): W=0.9877, p=0.4865  => Normal
+  FEV1 (L/s): W=0.9877, p=0.4865  => Normal
+  PEF (L/min): W=0.9769, p=0.07664  => Normal
+
+===========================================================================
+6. MATRICEA DE CORELATIE
+===========================================================================
+
+Matricea de corelatie Pearson:
+            Varsta_ani Inaltime_cm     Gen    FEV1     PEF
+Varsta_ani      1.0000     -0.0045 -0.0759 -0.0045  0.2768
+Inaltime_cm    -0.0045      1.0000 -0.0439  1.0000  0.6358
+Gen            -0.0759     -0.0439  1.0000 -0.0439 -0.0770
+FEV1           -0.0045      1.0000 -0.0439  1.0000  0.6358
+PEF             0.2768      0.6358 -0.0770  0.6358  1.0000
+
+Teste de semnificatie:
+
+  Varsta_ani vs PEF: r=0.2768, t=2.8517, df=98, p=0.005304
+  Inaltime_cm vs PEF: r=0.6358, t=8.1548, df=98, p=1.184e-12
+  Gen vs PEF: r=-0.0770, t=-0.7641, df=98, p=0.4466
+  Varsta_ani vs FEV1: r=-0.0045, t=-0.0450, df=98, p=0.9642
+  Inaltime_cm vs FEV1: r=1.0000, t=Inf, df=98, p=< 2.2e-16
+  Gen vs FEV1: r=-0.0439, t=-0.4347, df=98, p=0.6648
+  Varsta_ani vs Inaltime_cm: r=-0.0045, t=-0.0450, df=98, p=0.9642
+
+###################################################################
+# ANALIZA 1: PEF (Debitul Expirator Maxim de Varf)
+###################################################################
+
+--- PEF ~ Varsta_ani ---
+
+Call:
+lm(formula = PEF ~ Varsta_ani, data = data)
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   81.190     23.636   3.435  0.00087 ***
+Varsta_ani     7.310      2.564   2.852  0.00530 **
+
+Residual standard error: 40.62 on 98 degrees of freedom
+Multiple R-squared:  0.07662, Adjusted R-squared:  0.0672
+F-statistic: 8.132 on 1 and 98 DF,  p-value: 0.005304
+
+95% IC:
+                2.5 %    97.5 %
+(Intercept) 34.284458 128.09484
+Varsta_ani   2.223167  12.39763
+
+--- PEF ~ Inaltime_cm ---
+
+Call:
+lm(formula = PEF ~ Inaltime_cm, data = data)
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept) -88.1683    29.0938  -3.030  0.00312 **
+Inaltime_cm   1.9679     0.2413   8.155 1.18e-12 ***
+
+Residual standard error: 32.63 on 98 degrees of freedom
+Multiple R-squared:  0.4043, Adjusted R-squared:  0.3982
+F-statistic:  66.5 on 1 and 98 DF,  p-value: 1.184e-12
+
+95% IC:
+                  2.5 %     97.5 %
+(Intercept) -145.904002 -30.432545
+Inaltime_cm    1.489038   2.446826
+
+--- PEF ~ Gen ---
+
+Call:
+lm(formula = PEF ~ Gen, data = data)
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)  150.623      5.789  26.017   <2e-16 ***
+Gen           -6.452      8.445  -0.764    0.447
+
+Residual standard error: 42.15 on 98 degrees of freedom
+Multiple R-squared:  0.005922, Adjusted R-squared:  -0.004221
+F-statistic: 0.5838 on 1 and 98 DF,  p-value: 0.4466
+
+95% IC:
+                2.5 %    97.5 %
+(Intercept) 139.13393 162.11135
+Gen         -23.21044  10.30558
+
+===========================================================================
+1b. REGRESIE MULTIPLA: PEF ~ Varsta_ani + Inaltime_cm
+===========================================================================
+
+Call:
+lm(formula = PEF ~ Varsta_ani + Inaltime_cm, data = data)
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) -155.7349    32.4685  -4.796 5.84e-06 ***
+Varsta_ani     7.3869     1.9290   3.829 0.000228 ***
+Inaltime_cm    1.9719     0.2261   8.722 7.67e-14 ***
+
+Residual standard error: 30.57 on 97 degrees of freedom
+Multiple R-squared:  0.4825, Adjusted R-squared:  0.4718
+F-statistic: 45.22 on 2 and 97 DF,  p-value: 1.333e-14
+
+95% IC:
+                  2.5 %     97.5 %
+(Intercept) -220.175837 -91.294035
+Varsta_ani     3.558311  11.215473
+Inaltime_cm    1.523167   2.420569
+
+Ecuatia: PEF = -155.7349 + (7.3869) * Varsta + (1.9719) * Inaltime
+
+Testul F global:
+  H0: beta_varsta = beta_inaltime = 0
+  H1: cel putin un beta != 0
+  F = 45.2185
+  df1 = 2, df2 = 97
+  p-value = 1.333e-14
+  Decizie: Modelul este semnificativ (p < 0.05).
+
+R² = 0.4825
+R² ajustat = 0.4718
+Interpretare: 48.2% din variabilitatea PEF este explicata de varsta si inaltime.
+
+===========================================================================
+1c. REGRESIE MULTIPLA: PEF ~ Varsta_ani + Inaltime_cm + Gen
+===========================================================================
+
+Call:
+lm(formula = PEF ~ Varsta_ani + Inaltime_cm + Gen, data = data)
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) -153.6614    33.0655  -4.647 1.07e-05 ***
+Varsta_ani     7.3306     1.9432   3.772  0.00028 ***
+Inaltime_cm    1.9680     0.2273   8.658 1.13e-13 ***
+Gen           -2.3479     6.1753  -0.380  0.70464
+
+R² = 0.4833, R² ajustat = 0.4671
+
+Comparare model cu/fara Gen (ANOVA):
+  F = 0.1446, p = 0.7046
+  Adaugarea Gen NU imbunatateste semnificativ modelul.
+
+===========================================================================
+1d. DIAGNOSTICE MODEL PEF
+===========================================================================
+
+Shapiro-Wilk: W = 0.9746, p = 0.05029 => Reziduurile sunt normal distribuite.
+Breusch-Pagan: BP = 3.8829, p = 0.1435 => Homoscedasticitate respectata.
+Durbin-Watson: DW = 1.7959, p = 0.1513 => Erorile sunt independente.
+Cook's D > 4/n: 7 observatii
+Cook's D maxim: 0.1562
+Reziduuri standardizate |> 2|: 7 observatii
+
+VIF:
+ Varsta_ani Inaltime_cm
+   1.000021    1.000021
+  Toate VIF < 5: nu exista probleme de multicoliniaritate.
+
+###################################################################
+# ANALIZA 2: FEV1
+###################################################################
+
+--- FEV1 ~ Varsta_ani ---
+  R² = 0.0000, p = 0.9642 (nesemnificativ)
+
+--- FEV1 ~ Inaltime_cm ---
+  R² = 1.0000 (FIT PERFECT)
+  FEV1 = -1 + 0.02 * Inaltime_cm
+  Warning: "essentially perfect fit: summary may be unreliable"
+
+--- FEV1 ~ Gen ---
+  R² = 0.0019, p = 0.6648 (nesemnificativ)
+
+FEV1 ~ Varsta + Inaltime:
+  R² = 1.0000 (fit perfect, determinat integral de Inaltime)
+  Varsta nesemnificativa (p = 0.474)
+
+FEV1 ~ Varsta + Inaltime + Gen:
+  Gen nesemnificativ (p = 0.452)
+  ANOVA: F = 0.57, p = 0.4521
+
+Diagnostice FEV1:
+  Shapiro-Wilk: W = 0.9418, p = 0.0002 (reziduuri nenormale - artefact al fitului perfect)
+  Breusch-Pagan: BP = 1.4966, p = 0.4732
+  Durbin-Watson: DW = 2.4326, p = 0.9852
+
+###################################################################
+# SUMAR GENERAL
+###################################################################
+
+Model PEF ~ Varsta + Inaltime:
+  R² = 0.4825, Adj R² = 0.4718
+  F = 45.2185, p = 1.333e-14
+
+Model FEV1 ~ Varsta + Inaltime:
+  R² = 1.0000, Adj R² = 1.0000
+  F = 1.803e+32, p = < 2.2e-16
+
+=== ANALIZA COMPLETA ===
+```
