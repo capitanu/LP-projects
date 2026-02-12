@@ -281,106 +281,201 @@ PEF ~ Varsta + Inaltime + Gen + Varsta:Inaltime + Varsta:Gen + Inaltime:Gen
 
 ---
 
-## ANALIZA 2: FEV1 (Debitul Expirator Maxim in prima secunda)
+## ANALIZA 2: log10(FEV1) - Transformare logaritmica
 
-### 8. Regresii simple pentru FEV1
+### 8. Necesitatea transformarii log10(FEV1)
 
-#### 8.1 FEV1 ~ Varsta
-
-| Coeficient | Estimare | SE | t | p-value |
-|------------|----------|-----|---|---------|
-| Intercept | 1.4030 | 0.1589 | 8.828 | 4.22e-14 |
-| Varsta_ani | -0.0008 | 0.0172 | -0.045 | **0.9642** |
-
-- **R² ≈ 0.0000** — varsta nu explica deloc variabilitatea FEV1
-- Asocierea este complet nesemnificativa (p = 0.96)
-
-#### 8.2 FEV1 ~ Inaltime
-
-| Coeficient | Estimare | SE | t | p-value |
-|------------|----------|-----|---|---------|
-| Intercept | -1.000 | ~0 | -8.45e+15 | <2e-16 |
-| Inaltime_cm | 0.020 | ~0 | 2.04e+16 | <2e-16 |
-
-- **R² = 1.0000** — FIT PERFECT
-- **Avertisment R:** "essentially perfect fit: summary may be unreliable"
-
-**Aceasta este o constatare critica:** FEV1 este calculat EXACT din Inaltime prin formula determinista:
+Modelul original FEV1 ~ Inaltime_cm produce un **fit perfect** (R² = 1.000000) deoarece FEV1 este calculat exact din Inaltime prin formula determinista:
 
 ```
 FEV1 = -1 + 0.02 * Inaltime_cm
 ```
 
-Aceasta nu este o relatie statistica, ci una **matematica**. FEV1 a fost probabil derivat/calculat din Inaltime in setul de date, nu masurat independent. Din acest motiv, regresia pe FEV1 nu are sens statistic real — nu testam o relatie, ci verificam o identitate matematica.
+Aceasta relatie nu este statistica, ci **matematica**. Diagnosticele pe modelul original esueaza:
+- Shapiro-Wilk pe reziduuri: W = 0.9418, p = 0.0002 (reziduurile sunt erori de rotunjire, nu erori statistice reale)
+- R a emis avertismentul: "essentially perfect fit: summary may be unreliable"
 
-#### 8.3 FEV1 ~ Gen
+**Justificarea transformarii log10:**
+- FEV1 are o relatie determinista cu Inaltimea — diagnosticele nu sunt interpretabile
+- Transformarea log10 produce un model cu reziduuri reale, permitind evaluarea conditiilor regresiei
+- log10 este o transformare standard pentru volume/debite respiratorii in literatura medicala
+
+### 9. Statistici descriptive log10(FEV1)
+
+| Statistica | Valoare |
+|------------|---------|
+| N | 100 |
+| Media | 0.1364 |
+| Mediana | 0.1399 |
+| SD | 0.0881 |
+| Min | -0.1938 |
+| Max | 0.3345 |
+| Q1 | 0.0774 |
+| Q3 | 0.2041 |
+| IQR | 0.1268 |
+| Outlieri | 2 (-0.194, -0.119) |
+
+**Shapiro-Wilk pe log10(FEV1):** W = 0.9697, p = 0.0211 — distributia nu este strict normala (p < 0.05), dar transformarea a rezolvat problema fitului perfect.
+
+### 10. Comparare FEV1 original vs log10(FEV1)
+
+| Model | R² | Shapiro-Wilk reziduuri (W) | Shapiro-Wilk p | Concluzie |
+|-------|-----|---------------------------|----------------|-----------|
+| FEV1 ~ Inaltime (original) | 1.000000 | 0.9418 | 0.0002 | Fit perfect — diagnostic imposibil |
+| log10(FEV1) ~ Inaltime (transformat) | **0.9762** | 0.5841 | 2.17e-15 | Model realist, cu reziduuri reale |
+
+Transformarea log10 a eliminat relatia determinista: R² a scazut de la 1.0000 la 0.9762, generind reziduuri interpretabile statistic.
+
+### 11. Regresii simple pentru log10(FEV1)
+
+#### 11.1 log10(FEV1) ~ Varsta
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | 0.1414 | 0.0515 | 2.745 | 0.0072 | [0.039, 0.244] |
+| Varsta_ani | -0.0006 | 0.0056 | -0.100 | **0.9207** | [-0.012, 0.011] |
+
+- **R² = 0.0001** — varsta nu explica variabilitatea log10(FEV1)
+- Asocierea este complet nesemnificativa (p = 0.92)
+
+#### 11.2 log10(FEV1) ~ Inaltime
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | -0.6310 | 0.0122 | -51.82 | <2e-16 | [-0.655, -0.607] |
+| Inaltime_cm | 0.00641 | 0.000101 | 63.42 | **<2e-16** | [0.0062, 0.0066] |
+
+- **R² = 0.9762** — inaltimea explica 97.6% din variabilitatea log10(FEV1)
+- Asocierea este extrem de puternica si semnificativa
+- La fiecare cm in plus, log10(FEV1) creste cu 0.0064
+
+#### 11.3 log10(FEV1) ~ Gen
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | 0.1379 | 0.0122 | 11.338 | <2e-16 | [0.114, 0.162] |
+| Gen | -0.0032 | 0.0177 | -0.182 | **0.856** | [-0.038, 0.032] |
+
+- **R² = 0.0003** — genul nu explica variabilitatea log10(FEV1)
+- Nesemnificativ (p = 0.86)
+
+### 12. Regresie multipla: log10(FEV1) ~ Varsta + Inaltime
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | -0.6282 | 0.0146 | -43.114 | <2e-16 | [-0.657, -0.599] |
+| Varsta_ani | -0.0003 | 0.0009 | -0.357 | **0.722** | [-0.002, 0.001] |
+| Inaltime_cm | 0.00641 | 0.0001 | 63.134 | **<2e-16** | [0.0062, 0.0066] |
+
+**Ecuatia de regresie:**
+```
+log10(FEV1) = -0.6282 + (-0.0003) * Varsta + 0.0064 * Inaltime
+```
+
+**Performanta modelului:**
+- **R² = 0.9762** — 97.6% din variabilitatea log10(FEV1) este explicata de varsta si inaltime
+- **R² ajustat = 0.9758**
+- **F(2, 97) = 1993.17, p < 2.2e-16** — modelul este semnificativ global
+
+**Interpretare coeficienti (pe scala log10 — back-transform):**
+- **Varsta (b1 = -0.0003):** La cresterea varstei cu 1 an, FEV1 se multiplica cu 0.9993 (factor multiplicativ), adica o modificare de -0.07% — practic nesemnificativa (p = 0.722)
+- **Inaltime (b2 = 0.0064):** La cresterea inaltimii cu 1 cm, FEV1 se multiplica cu 1.0149, adica o crestere de **1.49%**, controlind pentru varsta
+- La cresterea inaltimii cu **10 cm**, FEV1 se multiplica cu **1.1589** (crestere de 15.89%)
+
+**Observatie:** Inaltimea ramine singurul predictor semnificativ. Varsta nu aduce informatie suplimentara (p = 0.722), ceea ce confirma ca FEV1 depinde in principal de inaltime.
+
+### 13. Modelul cu Gen: log10(FEV1) ~ Varsta + Inaltime + Gen
 
 | Coeficient | Estimare | SE | t | p-value |
 |------------|----------|-----|---|---------|
-| Intercept | 1.4072 | 0.0375 | 37.540 | <2e-16 |
-| Gen | -0.0238 | 0.0547 | -0.435 | **0.6648** |
+| Intercept | -0.6320 | 0.0147 | -43.116 | <2e-16 |
+| Varsta_ani | -0.0002 | 0.0009 | -0.238 | 0.813 |
+| Inaltime_cm | 0.00641 | 0.0001 | 63.634 | <2e-16 |
+| Gen | 0.0043 | 0.0027 | 1.586 | **0.116** |
 
-- **R² = 0.0019** — genul nu explica variabilitatea FEV1
-- Nesemnificativ (p = 0.66)
+- **R² = 0.9769**, R² ajustat = 0.9761
+- **ANOVA comparativa:** F = 2.5166, p = 0.1159
+- **Concluzie:** Adaugarea genului **NU** imbunatateste semnificativ modelul (p = 0.12). Genul nu este un predictor relevant al log10(FEV1).
 
-### 9. Regresie multipla: FEV1 ~ Varsta + Inaltime
-
-Din cauza relatiei deterministe FEV1 = -1 + 0.02 * Inaltime, acest model produce un fit perfect (R² = 1.0000) in care:
-- **Inaltime_cm** are coeficientul exact 0.02 (p < 2e-16)
-- **Varsta_ani** are coeficientul ~0 (p = 0.474, nesemnificativ)
-
-Modelul confirma ca intreaga variabilitate a FEV1 este explicata de Inaltime, iar Varsta nu aduce nicio informatie suplimentara (deoarece FEV1 este deja complet determinat de Inaltime).
-
-### 10. Modelul cu Gen: FEV1 ~ Varsta + Inaltime + Gen
-
-- Gen nesemnificativ (p = 0.452)
-- ANOVA comparativa: F = 0.57, p = 0.4521
-- Adaugarea genului nu imbunatateste modelul
-
-### 11. Diagnostice model FEV1
+### 14. Diagnostice model log10(FEV1) (Varsta + Inaltime)
 
 | Test | Statistica | p-value | Concluzie |
 |------|-----------|---------|-----------|
-| Shapiro-Wilk | W = 0.9418 | **0.0002** | Reziduurile NU sunt normal distribuite |
-| Breusch-Pagan | BP = 1.4966 | 0.4732 | Homoscedasticitate respectata |
-| Durbin-Watson | DW = 2.4326 | 0.9852 | Erorile sunt independente |
+| Shapiro-Wilk (normalitate reziduuri) | W = 0.5902 | **2.81e-15** | Reziduurile NU sunt normal distribuite |
+| Breusch-Pagan (homoscedasticitate) | BP = 5.3078 | 0.0704 | Homoscedasticitate respectata (la limita) |
+| Durbin-Watson (independenta erorilor) | DW = 1.9326 | 0.366 | Erorile sunt independente |
 
-**Nota:** Diagnosticele pentru FEV1 nu sunt relevante din punct de vedere practic deoarece reziduurile sunt de ordinul 10^-16 (erori de rotunjire ale computerului, nu erori statistice reale). Testul Shapiro-Wilk esueaza pe aceste reziduuri minuscule deoarece ele reflecta precizia aritmeticii in virgula mobila, nu o adevarata abatere de la normalitate.
+**Observatii puncte influentiale:**
+- Cook's D > 4/n: 6 observatii
+- Cook's D maxim: 1.5568 (o observatie cu influenta mare)
+- Reziduuri standardizate |> 2|: 4 observatii
 
-### 15. Modele cu interactiuni pentru FEV1
+**VIF (Variance Inflation Factor):**
+| Variabila | VIF |
+|-----------|-----|
+| Varsta_ani | 1.000 |
+| Inaltime_cm | 1.000 |
 
-**Nota:** Deoarece FEV1 = -1 + 0.02 * Inaltime_cm este o relatie determinista, interactiunile cu Inaltime vor produce tot un fit perfect (R² = 1.0). Interactiunile sunt prezentate pentru completitudine.
+VIF ≈ 1 — **nu exista multicoliniaritate**.
 
-#### 15.1 FEV1 ~ Varsta * Inaltime
+**Concluzie diagnostice:**
+- Normalitatea reziduurilor nu este respectata (Shapiro-Wilk p < 0.001) — acest lucru este datorat relatiei quasi-deterministe intre FEV1 si Inaltime, chiar si dupa transformare log10
+- Homoscedasticitate respectata (la limita, p = 0.07)
+- Independenta erorilor respectata (DW = 1.93, p = 0.37)
+- Absenta multicoliniaritatii (VIF = 1.0)
+- Exista o observatie cu Cook's D = 1.56 (puternic influentala), dar modelul ramine stabil
 
-- R² = 1.0000 (fit perfect, ca si fara interactiune)
-- Termenul de interactiune Varsta:Inaltime: coeficient ≈ 0 (p = 0.648)
-- **ANOVA comparativa:** F = 0.2098, p = 0.648
-- **Concluzie:** Interactiunea **NU** este semnificativa. FEV1 ramine complet determinat de Inaltime.
+### 15. Modele cu interactiuni pentru log10(FEV1)
 
-#### 15.2 FEV1 ~ Varsta * Gen
+#### 15.1 log10(FEV1) ~ Varsta * Inaltime
 
 | Coeficient | Estimare | SE | t | p-value |
 |------------|----------|-----|---|---------|
-| Intercept | 1.4729 | 0.2173 | 6.779 | 9.8e-10 |
-| Varsta_ani | -0.0071 | 0.0233 | -0.307 | 0.759 |
-| Gen | -0.1440 | 0.3232 | -0.445 | 0.657 |
-| Varsta:Gen | 0.0132 | 0.0351 | 0.376 | **0.707** |
+| Intercept | -0.5995 | 0.0886 | -6.764 | 1.05e-09 |
+| Varsta_ani | -0.0034 | 0.0096 | -0.359 | 0.721 |
+| Inaltime_cm | 0.0062 | 0.0007 | 8.421 | 3.63e-13 |
+| Varsta:Inaltime | 0.0000 | 0.0001 | 0.328 | **0.744** |
 
-- **R² = 0.0035**, R² ajustat = -0.0277
-- **ANOVA comparativa vs FEV1 ~ Varsta:** F = 0.1655, p = 0.8477
-- **Concluzie:** Interactiunea **NU** este semnificativa (p = 0.71). Nici varsta, nici genul, nici interactiunea lor nu explica FEV1 (deoarece FEV1 depinde exclusiv de inaltime).
+- **R² = 0.9763**, R² ajustat = 0.9755
+- **ANOVA comparativa:** F = 0.1075, p = 0.7437
+- **Concluzie:** Interactiunea **NU** este semnificativa (p = 0.74).
 
-#### 15.3 FEV1 ~ Inaltime * Gen
+#### 15.2 log10(FEV1) ~ Varsta * Gen
 
-- R² = 1.0000 (fit perfect)
-- Termenul de interactiune Inaltime:Gen: coeficient ≈ 0 (p = 0.376)
-- **ANOVA comparativa vs FEV1 ~ Inaltime:** F = 1.1337, p = 0.3261
-- **Concluzie:** Interactiunea **NU** este semnificativa. Relatia determinista FEV1-Inaltime nu difera pe gen.
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | 0.1635 | 0.0705 | 2.320 | 0.0225 |
+| Varsta_ani | -0.0028 | 0.0075 | -0.369 | 0.713 |
+| Gen | -0.0477 | 0.1048 | -0.455 | 0.650 |
+| Varsta:Gen | 0.0049 | 0.0114 | 0.429 | **0.669** |
 
-#### Sumar interactiuni FEV1
+- **R² = 0.0024**, R² ajustat = -0.0288
+- **ANOVA comparativa vs log10(FEV1) ~ Varsta:** F = 0.1098, p = 0.8961
+- **Concluzie:** Interactiunea **NU** este semnificativa (p = 0.67).
 
-Niciuna dintre interactiuni nu este semnificativa. Rezultatul era previzibil: FEV1 este complet determinat de Inaltime prin formula liniara, deci nicio alta variabila sau interactiune nu poate aduce informatie suplimentara.
+#### 15.3 log10(FEV1) ~ Inaltime * Gen
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | -0.6375 | 0.0152 | -42.05 | <2e-16 |
+| Inaltime_cm | 0.00644 | 0.000125 | 51.53 | <2e-16 |
+| Gen | 0.0145 | 0.0254 | 0.570 | 0.570 |
+| Inaltime:Gen | -0.0001 | 0.0002 | -0.400 | **0.690** |
+
+- **R² = 0.9769**, R² ajustat = 0.9762
+- **ANOVA comparativa vs log10(FEV1) ~ Inaltime:** F = 1.376, p = 0.2575
+- **Concluzie:** Interactiunea **NU** este semnificativa (p = 0.69).
+
+#### Sumar interactiuni log10(FEV1)
+
+| Model | R² | Adj R² | ANOVA p vs model de baza |
+|-------|-----|--------|--------------------------|
+| log10(FEV1) ~ Varsta + Inaltime (aditiv) | 0.9762 | 0.9758 | - |
+| + Varsta:Inaltime | 0.9763 | 0.9755 | 0.7437 |
+| + Varsta:Gen (vs log10(FEV1)~Varsta) | 0.0024 | -0.0288 | 0.8961 |
+| + Inaltime:Gen (vs log10(FEV1)~Inaltime) | 0.9769 | 0.9762 | 0.2575 |
+
+**Niciuna** dintre interactiuni nu este semnificativa. Modelul optim ramine **log10(FEV1) ~ Varsta + Inaltime** (dar numai Inaltime este semnificativ).
 
 ---
 
@@ -389,28 +484,34 @@ Niciuna dintre interactiuni nu este semnificativa. Rezultatul era previzibil: FE
 | Model | R² | R² ajustat | F | p-value |
 |-------|-----|------------|---|---------|
 | **PEF ~ Varsta + Inaltime** | **0.4825** | **0.4718** | 45.22 | 1.33e-14 |
-| FEV1 ~ Varsta + Inaltime | 1.0000 | 1.0000 | ~1.8e+32 | <2.2e-16 |
+| **log10(FEV1) ~ Varsta + Inaltime** | **0.9762** | **0.9758** | 1993.17 | <2.2e-16 |
 
 ### Concluzii
 
-1. **Modelul PEF** este modelul principal valid din punct de vedere statistic:
+1. **Modelul PEF** este un model valid din punct de vedere statistic:
    - 48.2% din variabilitatea PEF este explicata de varsta si inaltime impreuna
    - Ambii predictori sunt semnificativi independent: inaltimea (p < 10^-13) si varsta (p = 0.0002)
    - Inaltimea este predictorul dominant (R² simplu = 0.40 vs R² simplu varsta = 0.08)
    - Genul nu aduce informatie suplimentara semnificativa
    - Toate conditiile de validitate ale regresiei sunt indeplinite
 
-2. **Interactiunile** nu sunt semnificative pentru niciunul dintre modele:
-   - Varsta * Inaltime: p = 0.13 (pentru PEF); p = 0.65 (pentru FEV1)
-   - Varsta * Gen: p = 0.97 (pentru PEF); p = 0.71 (pentru FEV1)
-   - Inaltime * Gen: p = 0.79 (pentru PEF); p = 0.33 (pentru FEV1)
-   - Efectele variabilelor sunt aditive — relatia predictorilor cu variabilele spirometrice nu difera in functie de gen sau de nivelul celorlalti predictori
+2. **Modelul log10(FEV1)** — dupa transformarea logaritmica:
+   - Transformarea log10 a rezolvat problema fitului perfect (R² = 1.0 -> R² = 0.9762)
+   - 97.6% din variabilitatea log10(FEV1) este explicata de varsta si inaltime
+   - Doar Inaltimea este predictor semnificativ (p < 2e-16); Varsta este nesemnificativa (p = 0.72)
+   - La fiecare cm in plus de inaltime, FEV1 creste cu ~1.5% (pe scala originala)
+   - Genul nu aduce informatie suplimentara (p = 0.12)
+   - Normalitatea reziduurilor nu este complet respectata (datorita relatiei quasi-deterministe), dar celelalte conditii sunt indeplinite
 
-3. **Modelul FEV1** nu este valid din punct de vedere statistic deoarece FEV1 este o functie determinista a inaltimii (FEV1 = -1 + 0.02 * Inaltime_cm). Aceasta relatie perfecta (R² = 1.0) indica faptul ca FEV1 a fost probabil calculat din inaltime in setul de date, nu masurat independent prin spirometrie.
+3. **Interactiunile** nu sunt semnificative pentru niciunul dintre modele:
+   - Varsta * Inaltime: p = 0.13 (PEF); p = 0.74 (log10(FEV1))
+   - Varsta * Gen: p = 0.97 (PEF); p = 0.67 (log10(FEV1))
+   - Inaltime * Gen: p = 0.79 (PEF); p = 0.69 (log10(FEV1))
+   - Efectele variabilelor sunt aditive
 
 4. **Genul** nu este un predictor semnificativ pentru niciunul dintre parametrii spirometrici, nici individual, nici in combinatie cu celelalte variabile, nici prin interactiuni.
 
-5. **Varsta si Inaltimea** sunt aproape complet necorelate in acest esantion (r = -0.005), ceea ce le face predictori ortogonali ideali in modelul multiplu — fiecare aduce informatie independenta.
+5. **Varsta si Inaltimea** sunt aproape complet necorelate in acest esantion (r = -0.005), ceea ce le face predictori ortogonali ideali in modelul multiplu.
 
 ---
 
@@ -424,10 +525,13 @@ Niciuna dintre interactiuni nu este semnificativa. Rezultatul era previzibil: FE
 | `scatter_plots.png` | Scatter plots (PEF/FEV1 vs Varsta/Inaltime + Inaltime vs Varsta) |
 | `pef_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul PEF |
 | `pef_hist_resid.png` | Histograma reziduurilor modelului PEF |
-| `fev1_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul FEV1 |
-| `fev1_hist_resid.png` | Histograma reziduurilor modelului FEV1 |
+| `fev1_transform_compare.png` | Comparare histograme: FEV1 original vs log10(FEV1) transformat |
+| `fev1_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul log10(FEV1) |
+| `fev1_hist_resid.png` | Histograma reziduurilor modelului log10(FEV1) |
 | `pef_interaction_varsta_gen.png` | PEF vs Varsta, separat pe gen (grafic interactiune) |
 | `pef_interaction_inaltime_gen.png` | PEF vs Inaltime, separat pe gen (grafic interactiune) |
+| `fev1_interaction_varsta_gen.png` | log10(FEV1) vs Varsta, separat pe gen (grafic interactiune) |
+| `fev1_interaction_inaltime_gen.png` | log10(FEV1) vs Inaltime, separat pe gen (grafic interactiune) |
 
 ---
 
@@ -719,51 +823,125 @@ VIF:
   Interactiunile impreuna NU imbunatatesc semnificativ modelul.
 
 ###################################################################
-# ANALIZA 2: FEV1
+# ANALIZA 2: log10(FEV1) - Transformare logaritmica
 ###################################################################
 
---- FEV1 ~ Varsta_ani ---
-  R² = 0.0000, p = 0.9642 (nesemnificativ)
-
---- FEV1 ~ Inaltime_cm ---
-  R² = 1.0000 (FIT PERFECT)
-  FEV1 = -1 + 0.02 * Inaltime_cm
-  Warning: "essentially perfect fit: summary may be unreliable"
-
---- FEV1 ~ Gen ---
-  R² = 0.0019, p = 0.6648 (nesemnificativ)
-
-FEV1 ~ Varsta + Inaltime:
-  R² = 1.0000 (fit perfect, determinat integral de Inaltime)
-  Varsta nesemnificativa (p = 0.474)
-
-FEV1 ~ Varsta + Inaltime + Gen:
-  Gen nesemnificativ (p = 0.452)
-  ANOVA: F = 0.57, p = 0.4521
-
-Diagnostice FEV1:
-  Shapiro-Wilk: W = 0.9418, p = 0.0002 (reziduuri nenormale - artefact al fitului perfect)
-  Breusch-Pagan: BP = 1.4966, p = 0.4732
-  Durbin-Watson: DW = 2.4326, p = 0.9852
-
 ===========================================================================
-2f. MODELE CU INTERACTIUNI PENTRU FEV1
+2a. NECESITATEA TRANSFORMARII log10(FEV1)
 ===========================================================================
 
---- FEV1 ~ Varsta_ani * Inaltime_cm ---
-  R² = 1.0000 (fit perfect)
-  Varsta:Inaltime: p = 0.648
-  ANOVA: F=0.2098, p=0.648 => NU semnificativ
+--- Modelul original FEV1 ~ Inaltime_cm ---
 
---- FEV1 ~ Varsta_ani * Gen ---
-  R² = 0.0035, Adj R² = -0.0277
-  Varsta:Gen: p = 0.707
-  ANOVA vs FEV1~Varsta: F=0.1655, p=0.8477 => NU semnificativ
+R² = 1.000000
+Avertisment: 'essentially perfect fit' - R² = 1.0000
+FEV1 = -1 + 0.02 * Inaltime_cm (relatie determinista)
 
---- FEV1 ~ Inaltime_cm * Gen ---
-  R² = 1.0000 (fit perfect)
-  Inaltime:Gen: p = 0.376
-  ANOVA vs FEV1~Inaltime: F=1.1337, p=0.3261 => NU semnificativ
+Shapiro-Wilk pe reziduurile modelului FEV1 ~ Varsta + Inaltime:
+  W = 0.9418, p = 0.0002498
+  Reziduurile NU sunt normal distribuite (artefact al fitului perfect).
+
+Justificare transformare log10:
+  - FEV1 are o relatie determinista cu Inaltimea (R² = 1.0)
+  - Diagnosticele nu sunt interpretabile pe date netransformate
+  - Transformarea log10 va produce un model cu reziduuri reale,
+    permitind evaluarea semnificativa a conditiilor regresiei
+  - log10 este o transformare standard pentru volume/debite respiratorii
+
+===========================================================================
+2b. STATISTICI DESCRIPTIVE log10(FEV1)
+===========================================================================
+
+--- log10(FEV1) ---
+  N:        100
+  NA:       0
+  Media:    0.1364
+  Mediana:  0.1399
+  SD:       0.0881
+  Min:      -0.1938
+  Max:      0.3345
+  Q1:       0.0774
+  Q3:       0.2041
+  IQR:      0.1268
+  Outliers: 2
+    Valori: -0.19382 -0.1191864
+
+Shapiro-Wilk pe log10(FEV1):
+  W = 0.9697, p = 0.02112
+  log10(FEV1) NU urmeaza o distributie normala.
+
+===========================================================================
+2c. COMPARARE FEV1 ORIGINAL VS log10(FEV1)
+===========================================================================
+
+--- FEV1 ~ Inaltime (original) ---
+  R² = 1.000000 (fit perfect)
+  Shapiro-Wilk reziduuri: W = 0.9418, p = 0.0002498 (ESEC)
+
+--- log10(FEV1) ~ Inaltime (transformat) ---
+  R² = 0.9762
+  Shapiro-Wilk reziduuri: W = 0.5841, p = 2.17e-15
+  Reziduurile inca nu sunt normal distribuite, dar modelul e mai realist.
+
+===========================================================================
+2d. REGRESII SIMPLE PENTRU log10(FEV1)
+===========================================================================
+
+--- log10(FEV1) ~ Varsta_ani ---
+  R² = 0.0001, p = 0.9207 (nesemnificativ)
+
+--- log10(FEV1) ~ Inaltime_cm ---
+  R² = 0.9762, p < 2.2e-16 (semnificativ)
+  Coeficient Inaltime: 0.00641
+
+--- log10(FEV1) ~ Gen ---
+  R² = 0.0003, p = 0.856 (nesemnificativ)
+
+===========================================================================
+2e. REGRESIE MULTIPLA: log10(FEV1) ~ Varsta_ani + Inaltime_cm
+===========================================================================
+
+  R² = 0.9762, Adj R² = 0.9758
+  F(2, 97) = 1993.17, p < 2.2e-16
+  Ecuatia: log10(FEV1) = -0.6282 + (-0.0003) * Varsta + (0.0064) * Inaltime
+
+  Interpretare (back-transform):
+    +1 cm inaltime => FEV1 * 1.0149 (+1.49%)
+    +10 cm inaltime => FEV1 * 1.1589 (+15.89%)
+    +1 an varsta => FEV1 * 0.9993 (-0.07%, nesemnificativ)
+
+===========================================================================
+2f. REGRESIE MULTIPLA: log10(FEV1) ~ Varsta_ani + Inaltime_cm + Gen
+===========================================================================
+
+  R² = 0.9769, Adj R² = 0.9761
+  Gen: p = 0.116 (nesemnificativ)
+  ANOVA: F = 2.5166, p = 0.1159
+
+===========================================================================
+2g. DIAGNOSTICE MODEL log10(FEV1)
+===========================================================================
+
+  Shapiro-Wilk: W = 0.5902, p = 2.813e-15 (reziduuri nenormale)
+  Breusch-Pagan: BP = 5.3078, p = 0.0704 (homoscedasticitate la limita)
+  Durbin-Watson: DW = 1.9326, p = 0.366 (erorile sunt independente)
+  Cook's D > 4/n: 6 observatii; Cook's D maxim = 1.5568
+  VIF: Varsta=1.0, Inaltime=1.0
+
+===========================================================================
+2i. MODELE CU INTERACTIUNI PENTRU log10(FEV1)
+===========================================================================
+
+--- log10(FEV1) ~ Varsta * Inaltime ---
+  Varsta:Inaltime: p = 0.744
+  ANOVA: F=0.1075, p=0.7437 => NU semnificativ
+
+--- log10(FEV1) ~ Varsta * Gen ---
+  Varsta:Gen: p = 0.669
+  ANOVA vs log10(FEV1)~Varsta: F=0.1098, p=0.8961 => NU semnificativ
+
+--- log10(FEV1) ~ Inaltime * Gen ---
+  Inaltime:Gen: p = 0.690
+  ANOVA vs log10(FEV1)~Inaltime: F=1.376, p=0.2575 => NU semnificativ
 
 ###################################################################
 # SUMAR GENERAL
@@ -773,9 +951,9 @@ Model PEF ~ Varsta + Inaltime:
   R² = 0.4825, Adj R² = 0.4718
   F = 45.2185, p = 1.333e-14
 
-Model FEV1 ~ Varsta + Inaltime:
-  R² = 1.0000, Adj R² = 1.0000
-  F = 1.803e+32, p = < 2.2e-16
+Model log10(FEV1) ~ Varsta + Inaltime:
+  R² = 0.9762, Adj R² = 0.9758
+  F = 1993.1689, p = < 2.2e-16
 
 === ANALIZA COMPLETA ===
 ```

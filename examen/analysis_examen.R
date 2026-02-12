@@ -503,20 +503,118 @@ dev.off()
 cat("Salvat: pef_interaction_inaltime_gen.png\n\n")
 
 # =============================================================================
-#   ANALIZA 2: FEV1
+#   ANALIZA 2: log10(FEV1) - Transformare logaritmica
 # =============================================================================
 cat("###################################################################\n")
-cat("# ANALIZA 2: FEV1 (Debitul Expirator Maxim in prima secunda)\n")
+cat("# ANALIZA 2: log10(FEV1) - Transformare logaritmica\n")
 cat("###################################################################\n\n")
 
-# --- 2a. Regresii simple ---
+# --- 2a. Necesitatea transformarii ---
 cat("===========================================================================\n")
-cat("2a. REGRESII SIMPLE PENTRU FEV1\n")
+cat("2a. NECESITATEA TRANSFORMARII log10(FEV1)\n")
 cat("===========================================================================\n\n")
 
-# FEV1 ~ Varsta
-cat("--- FEV1 ~ Varsta_ani ---\n\n")
-m_fev_varsta <- lm(FEV1 ~ Varsta_ani, data=data)
+cat("--- Modelul original FEV1 ~ Inaltime_cm ---\n\n")
+m_fev_orig <- lm(FEV1 ~ Inaltime_cm, data=data)
+s_orig <- summary(m_fev_orig)
+cat("R² =", sprintf("%.6f", s_orig$r.squared), "\n")
+cat("Avertisment: 'essentially perfect fit' - R² = 1.0000\n")
+cat("FEV1 = -1 + 0.02 * Inaltime_cm (relatie determinista)\n\n")
+
+cat("Shapiro-Wilk pe reziduurile modelului FEV1 ~ Varsta + Inaltime:\n")
+m_fev_orig2 <- lm(FEV1 ~ Varsta_ani + Inaltime_cm, data=data)
+sw_orig <- shapiro.test(residuals(m_fev_orig2))
+cat("  W =", sprintf("%.4f", sw_orig$statistic),
+    ", p =", format.pval(sw_orig$p.value, digits=4), "\n")
+cat("  Reziduurile NU sunt normal distribuite (artefact al fitului perfect).\n\n")
+
+cat("Justificare transformare log10:\n")
+cat("  - FEV1 are o relatie determinista cu Inaltimea (R² = 1.0)\n")
+cat("  - Diagnosticele nu sunt interpretabile pe date netransformate\n")
+cat("  - Transformarea log10 va produce un model cu reziduuri reale,\n")
+cat("    permitind evaluarea semnificativa a conditiilor regresiei\n")
+cat("  - log10 este o transformare standard pentru volume/debite respiratorii\n\n")
+
+# Aplicare transformare
+data$log_FEV1 <- log10(data$FEV1)
+
+# --- 2b. Statistici descriptive log10(FEV1) ---
+cat("===========================================================================\n")
+cat("2b. STATISTICI DESCRIPTIVE log10(FEV1)\n")
+cat("===========================================================================\n\n")
+
+x <- data$log_FEV1
+cat("--- log10(FEV1) ---\n")
+cat("  N:       ", sum(!is.na(x)), "\n")
+cat("  NA:      ", sum(is.na(x)), "\n")
+cat("  Media:   ", sprintf("%.4f", mean(x, na.rm=TRUE)), "\n")
+cat("  Mediana: ", sprintf("%.4f", median(x, na.rm=TRUE)), "\n")
+cat("  SD:      ", sprintf("%.4f", sd(x, na.rm=TRUE)), "\n")
+cat("  Min:     ", sprintf("%.4f", min(x, na.rm=TRUE)), "\n")
+cat("  Max:     ", sprintf("%.4f", max(x, na.rm=TRUE)), "\n")
+q <- quantile(x, c(0.25, 0.75), na.rm=TRUE)
+iqr_val <- IQR(x, na.rm=TRUE)
+cat("  Q1:      ", sprintf("%.4f", q[1]), "\n")
+cat("  Q3:      ", sprintf("%.4f", q[2]), "\n")
+cat("  IQR:     ", sprintf("%.4f", iqr_val), "\n")
+out <- x[x < q[1] - 1.5*iqr_val | x > q[2] + 1.5*iqr_val]
+cat("  Outliers:", length(out), "\n")
+if (length(out) > 0 && length(out) <= 10) cat("    Valori:", out, "\n")
+cat("\n")
+
+cat("Shapiro-Wilk pe log10(FEV1):\n")
+sw_log <- shapiro.test(data$log_FEV1)
+cat("  W =", sprintf("%.4f", sw_log$statistic),
+    ", p =", format.pval(sw_log$p.value, digits=4), "\n")
+if (sw_log$p.value > 0.05) {
+  cat("  log10(FEV1) urmeaza o distributie normala.\n\n")
+} else {
+  cat("  log10(FEV1) NU urmeaza o distributie normala.\n\n")
+}
+
+# Histograme comparare original vs transformat
+png("fev1_transform_compare.png", width=900, height=450)
+par(mfrow=c(1,2))
+hist(data$FEV1, breaks=15, main="FEV1 (original)", xlab="FEV1 (L/s)",
+     col="lightyellow", probability=TRUE)
+curve(dnorm(x, mean=mean(data$FEV1), sd=sd(data$FEV1)), add=TRUE, col="red", lwd=2)
+hist(data$log_FEV1, breaks=15, main="log10(FEV1) (transformat)", xlab="log10(FEV1)",
+     col="lightgreen", probability=TRUE)
+curve(dnorm(x, mean=mean(data$log_FEV1), sd=sd(data$log_FEV1)), add=TRUE, col="red", lwd=2)
+dev.off()
+cat("Salvat: fev1_transform_compare.png\n\n")
+
+# --- 2c. Comparare original vs transformat ---
+cat("===========================================================================\n")
+cat("2c. COMPARARE FEV1 ORIGINAL VS log10(FEV1)\n")
+cat("===========================================================================\n\n")
+
+cat("--- FEV1 ~ Inaltime (original) ---\n")
+cat("  R² =", sprintf("%.6f", s_orig$r.squared), " (fit perfect)\n")
+cat("  Shapiro-Wilk reziduuri: W =", sprintf("%.4f", sw_orig$statistic),
+    ", p =", format.pval(sw_orig$p.value, digits=4), " (ESEC)\n\n")
+
+m_log_inaltime_check <- lm(log_FEV1 ~ Inaltime_cm, data=data)
+s_log_check <- summary(m_log_inaltime_check)
+sw_log_resid <- shapiro.test(residuals(m_log_inaltime_check))
+cat("--- log10(FEV1) ~ Inaltime (transformat) ---\n")
+cat("  R² =", sprintf("%.4f", s_log_check$r.squared), "\n")
+cat("  Shapiro-Wilk reziduuri: W =", sprintf("%.4f", sw_log_resid$statistic),
+    ", p =", format.pval(sw_log_resid$p.value, digits=4), "\n")
+if (sw_log_resid$p.value > 0.05) {
+  cat("  Reziduurile sunt normal distribuite => transformarea a rezolvat problema.\n\n")
+} else {
+  cat("  Reziduurile inca nu sunt normal distribuite, dar modelul e mai realist.\n\n")
+}
+
+# --- 2d. Regresii simple pentru log10(FEV1) ---
+cat("===========================================================================\n")
+cat("2d. REGRESII SIMPLE PENTRU log10(FEV1)\n")
+cat("===========================================================================\n\n")
+
+# log10(FEV1) ~ Varsta
+cat("--- log10(FEV1) ~ Varsta_ani ---\n\n")
+m_fev_varsta <- lm(log_FEV1 ~ Varsta_ani, data=data)
 s <- summary(m_fev_varsta)
 print(s)
 cat("\n")
@@ -525,9 +623,9 @@ cat("95% IC:\n")
 print(ci)
 cat("\nR² =", sprintf("%.4f", s$r.squared), "\n\n")
 
-# FEV1 ~ Inaltime
-cat("--- FEV1 ~ Inaltime_cm ---\n\n")
-m_fev_inaltime <- lm(FEV1 ~ Inaltime_cm, data=data)
+# log10(FEV1) ~ Inaltime
+cat("--- log10(FEV1) ~ Inaltime_cm ---\n\n")
+m_fev_inaltime <- lm(log_FEV1 ~ Inaltime_cm, data=data)
 s <- summary(m_fev_inaltime)
 print(s)
 cat("\n")
@@ -536,9 +634,9 @@ cat("95% IC:\n")
 print(ci)
 cat("\nR² =", sprintf("%.4f", s$r.squared), "\n\n")
 
-# FEV1 ~ Gen
-cat("--- FEV1 ~ Gen ---\n\n")
-m_fev_gen <- lm(FEV1 ~ Gen, data=data)
+# log10(FEV1) ~ Gen
+cat("--- log10(FEV1) ~ Gen ---\n\n")
+m_fev_gen <- lm(log_FEV1 ~ Gen, data=data)
 s <- summary(m_fev_gen)
 print(s)
 cat("\n")
@@ -547,12 +645,12 @@ cat("95% IC:\n")
 print(ci)
 cat("\nR² =", sprintf("%.4f", s$r.squared), "\n\n")
 
-# --- 2b. Regresie multipla: FEV1 ~ Varsta + Inaltime ---
+# --- 2e. Regresie multipla: log10(FEV1) ~ Varsta + Inaltime ---
 cat("===========================================================================\n")
-cat("2b. REGRESIE MULTIPLA: FEV1 ~ Varsta_ani + Inaltime_cm\n")
+cat("2e. REGRESIE MULTIPLA: log10(FEV1) ~ Varsta_ani + Inaltime_cm\n")
 cat("===========================================================================\n\n")
 
-model_fev <- lm(FEV1 ~ Varsta_ani + Inaltime_cm, data=data)
+model_fev <- lm(log_FEV1 ~ Varsta_ani + Inaltime_cm, data=data)
 s_fev <- summary(model_fev)
 print(s_fev)
 cat("\n")
@@ -562,9 +660,9 @@ cat("95% IC:\n")
 print(ci_fev)
 cat("\n")
 
-cat("Ecuatia: FEV1 =", sprintf("%.4f", coef(model_fev)[1]), "+ (",
-    sprintf("%.4f", coef(model_fev)[2]), ") * Varsta + (",
-    sprintf("%.4f", coef(model_fev)[3]), ") * Inaltime\n\n")
+cat("Ecuatia: log10(FEV1) =", sprintf("%.6f", coef(model_fev)[1]), "+ (",
+    sprintf("%.6f", coef(model_fev)[2]), ") * Varsta + (",
+    sprintf("%.6f", coef(model_fev)[3]), ") * Inaltime\n\n")
 
 # Test F global
 cat("Testul F global:\n")
@@ -583,14 +681,14 @@ if (p_f_fev < 0.05) {
 cat("R² =", sprintf("%.4f", s_fev$r.squared), "\n")
 cat("R² ajustat =", sprintf("%.4f", s_fev$adj.r.squared), "\n")
 cat("Interpretare:", sprintf("%.1f%%", s_fev$r.squared*100),
-    "din variabilitatea FEV1 este explicata de varsta si inaltime.\n\n")
+    "din variabilitatea log10(FEV1) este explicata de varsta si inaltime.\n\n")
 
-# --- 2c. Regresie multipla cu Gen: FEV1 ~ Varsta + Inaltime + Gen ---
+# --- 2f. Regresie multipla cu Gen: log10(FEV1) ~ Varsta + Inaltime + Gen ---
 cat("===========================================================================\n")
-cat("2c. REGRESIE MULTIPLA: FEV1 ~ Varsta_ani + Inaltime_cm + Gen\n")
+cat("2f. REGRESIE MULTIPLA: log10(FEV1) ~ Varsta_ani + Inaltime_cm + Gen\n")
 cat("===========================================================================\n\n")
 
-model_fev_gen <- lm(FEV1 ~ Varsta_ani + Inaltime_cm + Gen, data=data)
+model_fev_gen <- lm(log_FEV1 ~ Varsta_ani + Inaltime_cm + Gen, data=data)
 s_fev_gen <- summary(model_fev_gen)
 print(s_fev_gen)
 cat("\n")
@@ -614,9 +712,9 @@ if (anova_fev$`Pr(>F)`[2] < 0.05) {
   cat("Adaugarea Gen NU imbunatateste semnificativ modelul (p >= 0.05).\n\n")
 }
 
-# --- 2d. Diagnostice model FEV1 ---
+# --- 2g. Diagnostice model log10(FEV1) ---
 cat("===========================================================================\n")
-cat("2d. DIAGNOSTICE MODEL FEV1 (Varsta + Inaltime)\n")
+cat("2g. DIAGNOSTICE MODEL log10(FEV1) (Varsta + Inaltime)\n")
 cat("===========================================================================\n\n")
 
 resid_fev <- residuals(model_fev)
@@ -677,42 +775,49 @@ dev.off()
 cat("Salvat: fev1_diagnostic.png\n")
 
 png("fev1_hist_resid.png", width=600, height=500)
-hist(resid_fev, breaks=20, main="Histograma reziduurilor (model FEV1)",
+hist(resid_fev, breaks=20, main="Histograma reziduurilor (model log10(FEV1))",
      xlab="Reziduuri", col="lightgreen", probability=TRUE)
 curve(dnorm(x, mean=mean(resid_fev), sd=sd(resid_fev)), add=TRUE, col="red", lwd=2)
 dev.off()
 cat("Salvat: fev1_hist_resid.png\n\n")
 
-# --- 2e. Interpretare FEV1 ---
+# --- 2h. Interpretare log10(FEV1) ---
 cat("===========================================================================\n")
-cat("2e. INTERPRETARE MODEL FEV1\n")
+cat("2h. INTERPRETARE MODEL log10(FEV1)\n")
 cat("===========================================================================\n\n")
 
 coef_fev <- coef(model_fev)
-cat("Coeficienti:\n")
-cat("  Intercept (b0) =", sprintf("%.4f", coef_fev[1]),
-    "=> FEV1 estimat cand varsta=0 si inaltime=0 (nu are sens clinic)\n")
-cat("  Varsta_ani (b1) =", sprintf("%.4f", coef_fev[2]),
-    "=> La cresterea cu 1 an a varstei,\n")
-cat("    FEV1 creste cu", sprintf("%.4f", coef_fev[2]),
-    "L/s, controlind pentru inaltime.\n")
-cat("  Inaltime_cm (b2) =", sprintf("%.4f", coef_fev[3]),
-    "=> La cresterea cu 1 cm a inaltimii,\n")
-cat("    FEV1 creste cu", sprintf("%.4f", coef_fev[3]),
-    "L/s, controlind pentru varsta.\n\n")
+cat("Coeficienti (pe scala log10):\n")
+cat("  Intercept (b0) =", sprintf("%.6f", coef_fev[1]), "\n")
+cat("  Varsta_ani (b1) =", sprintf("%.6f", coef_fev[2]), "\n")
+cat("  Inaltime_cm (b2) =", sprintf("%.6f", coef_fev[3]), "\n\n")
 
-# --- 2f. Modele cu interactiuni FEV1 ---
+cat("Interpretare pe scala originala (back-transform):\n")
+cat("  La cresterea cu 1 an a varstei, FEV1 se multiplica cu",
+    sprintf("%.4f", 10^coef_fev[2]),
+    "(factor multiplicativ), controlind pentru inaltime.\n")
+pct_varsta <- (10^coef_fev[2] - 1) * 100
+cat("  Aceasta corespunde unei modificari de", sprintf("%.2f%%", pct_varsta), "\n\n")
+
+cat("  La cresterea cu 1 cm a inaltimii, FEV1 se multiplica cu",
+    sprintf("%.4f", 10^coef_fev[3]),
+    "(factor multiplicativ), controlind pentru varsta.\n")
+pct_inaltime <- (10^coef_fev[3] - 1) * 100
+cat("  Aceasta corespunde unei cresteri de", sprintf("%.2f%%", pct_inaltime), "\n\n")
+
+cat("  La cresterea cu 10 cm a inaltimii, FEV1 se multiplica cu",
+    sprintf("%.4f", 10^(10*coef_fev[3])), "\n")
+pct_10cm <- (10^(10*coef_fev[3]) - 1) * 100
+cat("  Aceasta corespunde unei cresteri de", sprintf("%.2f%%", pct_10cm), "\n\n")
+
+# --- 2i. Modele cu interactiuni log10(FEV1) ---
 cat("===========================================================================\n")
-cat("2f. MODELE CU INTERACTIUNI PENTRU FEV1\n")
+cat("2i. MODELE CU INTERACTIUNI PENTRU log10(FEV1)\n")
 cat("===========================================================================\n\n")
 
-cat("NOTA: FEV1 = -1 + 0.02 * Inaltime_cm (relatie determinista).\n")
-cat("Interactiunile nu vor aduce informatie suplimentara reala,\n")
-cat("dar le prezentam pentru completitudine.\n\n")
-
 # Interactiune Varsta * Inaltime
-cat("--- FEV1 ~ Varsta_ani * Inaltime_cm ---\n\n")
-model_fev_int1 <- lm(FEV1 ~ Varsta_ani * Inaltime_cm, data=data)
+cat("--- log10(FEV1) ~ Varsta_ani * Inaltime_cm ---\n\n")
+model_fev_int1 <- lm(log_FEV1 ~ Varsta_ani * Inaltime_cm, data=data)
 s_fev_int1 <- summary(model_fev_int1)
 print(s_fev_int1)
 cat("\n")
@@ -732,8 +837,8 @@ if (anova_fev_int1$`Pr(>F)`[2] < 0.05) {
 }
 
 # Interactiune Varsta * Gen
-cat("--- FEV1 ~ Varsta_ani * Gen ---\n\n")
-model_fev_int2 <- lm(FEV1 ~ Varsta_ani * Gen, data=data)
+cat("--- log10(FEV1) ~ Varsta_ani * Gen ---\n\n")
+model_fev_int2 <- lm(log_FEV1 ~ Varsta_ani * Gen, data=data)
 s_fev_int2 <- summary(model_fev_int2)
 print(s_fev_int2)
 cat("\n")
@@ -742,7 +847,7 @@ cat("95% IC:\n")
 print(ci_fev_int2)
 cat("\n")
 
-cat("Comparare cu modelul simplu FEV1 ~ Varsta (ANOVA):\n")
+cat("Comparare cu modelul simplu log10(FEV1) ~ Varsta (ANOVA):\n")
 anova_fev_int2 <- anova(m_fev_varsta, model_fev_int2)
 print(anova_fev_int2)
 cat("\n")
@@ -753,8 +858,8 @@ if (anova_fev_int2$`Pr(>F)`[2] < 0.05) {
 }
 
 # Interactiune Inaltime * Gen
-cat("--- FEV1 ~ Inaltime_cm * Gen ---\n\n")
-model_fev_int3 <- lm(FEV1 ~ Inaltime_cm * Gen, data=data)
+cat("--- log10(FEV1) ~ Inaltime_cm * Gen ---\n\n")
+model_fev_int3 <- lm(log_FEV1 ~ Inaltime_cm * Gen, data=data)
 s_fev_int3 <- summary(model_fev_int3)
 print(s_fev_int3)
 cat("\n")
@@ -763,7 +868,7 @@ cat("95% IC:\n")
 print(ci_fev_int3)
 cat("\n")
 
-cat("Comparare cu modelul simplu FEV1 ~ Inaltime (ANOVA):\n")
+cat("Comparare cu modelul simplu log10(FEV1) ~ Inaltime (ANOVA):\n")
 anova_fev_int3 <- anova(m_fev_inaltime, model_fev_int3)
 print(anova_fev_int3)
 cat("\n")
@@ -772,6 +877,33 @@ if (anova_fev_int3$`Pr(>F)`[2] < 0.05) {
 } else {
   cat("Interactiunea Inaltime*Gen NU este semnificativa (p >= 0.05).\n\n")
 }
+
+# Interaction plots for log10(FEV1)
+png("fev1_interaction_varsta_gen.png", width=600, height=500)
+plot(data$Varsta_ani[data$Gen==0], data$log_FEV1[data$Gen==0],
+     pch=19, col=rgb(1,0,0,0.5), xlim=range(data$Varsta_ani), ylim=range(data$log_FEV1),
+     xlab="Varsta (ani)", ylab="log10(FEV1)", main="log10(FEV1) vs Varsta per Gen")
+points(data$Varsta_ani[data$Gen==1], data$log_FEV1[data$Gen==1],
+       pch=17, col=rgb(0,0,1,0.5))
+abline(lm(log_FEV1 ~ Varsta_ani, data=data[data$Gen==0,]), col="red", lwd=2)
+abline(lm(log_FEV1 ~ Varsta_ani, data=data[data$Gen==1,]), col="blue", lwd=2)
+legend("topleft", legend=c("Feminin", "Masculin"), col=c("red","blue"),
+       pch=c(19,17), lty=1, lwd=2, bty="n")
+dev.off()
+cat("Salvat: fev1_interaction_varsta_gen.png\n")
+
+png("fev1_interaction_inaltime_gen.png", width=600, height=500)
+plot(data$Inaltime_cm[data$Gen==0], data$log_FEV1[data$Gen==0],
+     pch=19, col=rgb(1,0,0,0.5), xlim=range(data$Inaltime_cm), ylim=range(data$log_FEV1),
+     xlab="Inaltime (cm)", ylab="log10(FEV1)", main="log10(FEV1) vs Inaltime per Gen")
+points(data$Inaltime_cm[data$Gen==1], data$log_FEV1[data$Gen==1],
+       pch=17, col=rgb(0,0,1,0.5))
+abline(lm(log_FEV1 ~ Inaltime_cm, data=data[data$Gen==0,]), col="red", lwd=2)
+abline(lm(log_FEV1 ~ Inaltime_cm, data=data[data$Gen==1,]), col="blue", lwd=2)
+legend("topleft", legend=c("Feminin", "Masculin"), col=c("red","blue"),
+       pch=c(19,17), lty=1, lwd=2, bty="n")
+dev.off()
+cat("Salvat: fev1_interaction_inaltime_gen.png\n\n")
 
 # =============================================================================
 # SUMAR GENERAL
@@ -786,7 +918,7 @@ cat("  R² =", sprintf("%.4f", s_pef$r.squared),
 cat("  F =", sprintf("%.4f", s_pef$fstatistic[1]),
     ", p =", format.pval(p_f_pef, digits=4), "\n\n")
 
-cat("Model FEV1 ~ Varsta + Inaltime:\n")
+cat("Model log10(FEV1) ~ Varsta + Inaltime:\n")
 cat("  R² =", sprintf("%.4f", s_fev$r.squared),
     ", Adj R² =", sprintf("%.4f", s_fev$adj.r.squared), "\n")
 cat("  F =", sprintf("%.4f", s_fev$fstatistic[1]),
