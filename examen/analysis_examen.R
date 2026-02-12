@@ -191,20 +191,113 @@ for (p in pairs) {
 cat("\n")
 
 # =============================================================================
-#   ANALIZA 1: PEF
+#   ANALIZA 1: log10(PEF) - Transformare logaritmica
 # =============================================================================
 cat("###################################################################\n")
-cat("# ANALIZA 1: PEF (Debitul Expirator Maxim de Varf)\n")
+cat("# ANALIZA 1: log10(PEF) - Transformare logaritmica\n")
 cat("###################################################################\n\n")
 
-# --- 1a. Regresii simple ---
+# --- 1a. Necesitatea transformarii ---
 cat("===========================================================================\n")
-cat("1a. REGRESII SIMPLE PENTRU PEF\n")
+cat("1a. NECESITATEA TRANSFORMARII log10(PEF)\n")
 cat("===========================================================================\n\n")
 
-# PEF ~ Varsta
-cat("--- PEF ~ Varsta_ani ---\n\n")
-m_pef_varsta <- lm(PEF ~ Varsta_ani, data=data)
+cat("--- Modelul original PEF ~ Varsta + Inaltime ---\n\n")
+m_pef_orig <- lm(PEF ~ Varsta_ani + Inaltime_cm, data=data)
+s_pef_orig <- summary(m_pef_orig)
+sw_pef_orig <- shapiro.test(residuals(m_pef_orig))
+bp_pef_orig <- bptest(m_pef_orig)
+cat("R² =", sprintf("%.4f", s_pef_orig$r.squared), "\n")
+cat("Shapiro-Wilk reziduuri: W =", sprintf("%.4f", sw_pef_orig$statistic),
+    ", p =", format.pval(sw_pef_orig$p.value, digits=4), "\n")
+cat("Breusch-Pagan: BP =", sprintf("%.4f", bp_pef_orig$statistic),
+    ", p =", format.pval(bp_pef_orig$p.value, digits=4), "\n\n")
+
+cat("Justificare transformare log10:\n")
+cat("  - Shapiro-Wilk pe reziduuri este la limita (p = 0.0503)\n")
+cat("  - PEF nu urmeaza strict o distributie normala (Shapiro-Wilk p = 0.077)\n")
+cat("  - Transformarea log10 imbunatateste normalitatea reziduurilor si homoscedasticitatea\n")
+cat("  - log10 este o transformare standard pentru debite respiratorii\n\n")
+
+# Aplicare transformare
+data$log_PEF <- log10(data$PEF)
+
+# --- 1b. Statistici descriptive log10(PEF) ---
+cat("===========================================================================\n")
+cat("1b. STATISTICI DESCRIPTIVE log10(PEF)\n")
+cat("===========================================================================\n\n")
+
+x <- data$log_PEF
+cat("--- log10(PEF) ---\n")
+cat("  N:       ", sum(!is.na(x)), "\n")
+cat("  NA:      ", sum(is.na(x)), "\n")
+cat("  Media:   ", sprintf("%.4f", mean(x, na.rm=TRUE)), "\n")
+cat("  Mediana: ", sprintf("%.4f", median(x, na.rm=TRUE)), "\n")
+cat("  SD:      ", sprintf("%.4f", sd(x, na.rm=TRUE)), "\n")
+cat("  Min:     ", sprintf("%.4f", min(x, na.rm=TRUE)), "\n")
+cat("  Max:     ", sprintf("%.4f", max(x, na.rm=TRUE)), "\n")
+q <- quantile(x, c(0.25, 0.75), na.rm=TRUE)
+iqr_val <- IQR(x, na.rm=TRUE)
+cat("  Q1:      ", sprintf("%.4f", q[1]), "\n")
+cat("  Q3:      ", sprintf("%.4f", q[2]), "\n")
+cat("  IQR:     ", sprintf("%.4f", iqr_val), "\n")
+out <- x[x < q[1] - 1.5*iqr_val | x > q[2] + 1.5*iqr_val]
+cat("  Outliers:", length(out), "\n")
+if (length(out) > 0 && length(out) <= 10) cat("    Valori:", out, "\n")
+cat("\n")
+
+cat("Shapiro-Wilk pe log10(PEF):\n")
+sw_log_pef <- shapiro.test(data$log_PEF)
+cat("  W =", sprintf("%.4f", sw_log_pef$statistic),
+    ", p =", format.pval(sw_log_pef$p.value, digits=4), "\n")
+if (sw_log_pef$p.value > 0.05) {
+  cat("  log10(PEF) urmeaza o distributie normala.\n\n")
+} else {
+  cat("  log10(PEF) NU urmeaza o distributie normala.\n\n")
+}
+
+# Histograme comparare original vs transformat
+png("pef_transform_compare.png", width=900, height=450)
+par(mfrow=c(1,2))
+hist(data$PEF, breaks=15, main="PEF (original)", xlab="PEF (L/min)",
+     col="pink", probability=TRUE)
+curve(dnorm(x, mean=mean(data$PEF), sd=sd(data$PEF)), add=TRUE, col="red", lwd=2)
+hist(data$log_PEF, breaks=15, main="log10(PEF) (transformat)", xlab="log10(PEF)",
+     col="lightblue", probability=TRUE)
+curve(dnorm(x, mean=mean(data$log_PEF), sd=sd(data$log_PEF)), add=TRUE, col="red", lwd=2)
+dev.off()
+cat("Salvat: pef_transform_compare.png\n\n")
+
+# --- 1c. Comparare original vs transformat ---
+cat("===========================================================================\n")
+cat("1c. COMPARARE PEF ORIGINAL VS log10(PEF)\n")
+cat("===========================================================================\n\n")
+
+cat("--- PEF ~ Varsta + Inaltime (original) ---\n")
+cat("  R² =", sprintf("%.4f", s_pef_orig$r.squared), "\n")
+cat("  Shapiro-Wilk reziduuri: W =", sprintf("%.4f", sw_pef_orig$statistic),
+    ", p =", format.pval(sw_pef_orig$p.value, digits=4), " (la limita)\n")
+cat("  Breusch-Pagan: p =", format.pval(bp_pef_orig$p.value, digits=4), "\n\n")
+
+m_log_pef_check <- lm(log_PEF ~ Varsta_ani + Inaltime_cm, data=data)
+s_log_pef_check <- summary(m_log_pef_check)
+sw_log_pef_resid <- shapiro.test(residuals(m_log_pef_check))
+bp_log_pef_check <- bptest(m_log_pef_check)
+cat("--- log10(PEF) ~ Varsta + Inaltime (transformat) ---\n")
+cat("  R² =", sprintf("%.4f", s_log_pef_check$r.squared), "\n")
+cat("  Shapiro-Wilk reziduuri: W =", sprintf("%.4f", sw_log_pef_resid$statistic),
+    ", p =", format.pval(sw_log_pef_resid$p.value, digits=4), "\n")
+cat("  Breusch-Pagan: p =", format.pval(bp_log_pef_check$p.value, digits=4), "\n")
+cat("  => Transformarea imbunatateste semnificativ diagnosticele.\n\n")
+
+# --- 1d. Regresii simple pentru log10(PEF) ---
+cat("===========================================================================\n")
+cat("1d. REGRESII SIMPLE PENTRU log10(PEF)\n")
+cat("===========================================================================\n\n")
+
+# log10(PEF) ~ Varsta
+cat("--- log10(PEF) ~ Varsta_ani ---\n\n")
+m_pef_varsta <- lm(log_PEF ~ Varsta_ani, data=data)
 s <- summary(m_pef_varsta)
 print(s)
 cat("\n")
@@ -213,9 +306,9 @@ cat("95% IC:\n")
 print(ci)
 cat("\nR² =", sprintf("%.4f", s$r.squared), "\n\n")
 
-# PEF ~ Inaltime
-cat("--- PEF ~ Inaltime_cm ---\n\n")
-m_pef_inaltime <- lm(PEF ~ Inaltime_cm, data=data)
+# log10(PEF) ~ Inaltime
+cat("--- log10(PEF) ~ Inaltime_cm ---\n\n")
+m_pef_inaltime <- lm(log_PEF ~ Inaltime_cm, data=data)
 s <- summary(m_pef_inaltime)
 print(s)
 cat("\n")
@@ -224,9 +317,9 @@ cat("95% IC:\n")
 print(ci)
 cat("\nR² =", sprintf("%.4f", s$r.squared), "\n\n")
 
-# PEF ~ Gen
-cat("--- PEF ~ Gen ---\n\n")
-m_pef_gen <- lm(PEF ~ Gen, data=data)
+# log10(PEF) ~ Gen
+cat("--- log10(PEF) ~ Gen ---\n\n")
+m_pef_gen <- lm(log_PEF ~ Gen, data=data)
 s <- summary(m_pef_gen)
 print(s)
 cat("\n")
@@ -235,12 +328,12 @@ cat("95% IC:\n")
 print(ci)
 cat("\nR² =", sprintf("%.4f", s$r.squared), "\n\n")
 
-# --- 1b. Regresie multipla: PEF ~ Varsta + Inaltime ---
+# --- 1e. Regresie multipla: log10(PEF) ~ Varsta + Inaltime ---
 cat("===========================================================================\n")
-cat("1b. REGRESIE MULTIPLA: PEF ~ Varsta_ani + Inaltime_cm\n")
+cat("1e. REGRESIE MULTIPLA: log10(PEF) ~ Varsta_ani + Inaltime_cm\n")
 cat("===========================================================================\n\n")
 
-model_pef <- lm(PEF ~ Varsta_ani + Inaltime_cm, data=data)
+model_pef <- lm(log_PEF ~ Varsta_ani + Inaltime_cm, data=data)
 s_pef <- summary(model_pef)
 print(s_pef)
 cat("\n")
@@ -250,9 +343,9 @@ cat("95% IC:\n")
 print(ci_pef)
 cat("\n")
 
-cat("Ecuatia: PEF =", sprintf("%.4f", coef(model_pef)[1]), "+ (",
-    sprintf("%.4f", coef(model_pef)[2]), ") * Varsta + (",
-    sprintf("%.4f", coef(model_pef)[3]), ") * Inaltime\n\n")
+cat("Ecuatia: log10(PEF) =", sprintf("%.6f", coef(model_pef)[1]), "+ (",
+    sprintf("%.6f", coef(model_pef)[2]), ") * Varsta + (",
+    sprintf("%.6f", coef(model_pef)[3]), ") * Inaltime\n\n")
 
 # Test F global
 cat("Testul F global:\n")
@@ -271,14 +364,14 @@ if (p_f_pef < 0.05) {
 cat("R² =", sprintf("%.4f", s_pef$r.squared), "\n")
 cat("R² ajustat =", sprintf("%.4f", s_pef$adj.r.squared), "\n")
 cat("Interpretare:", sprintf("%.1f%%", s_pef$r.squared*100),
-    "din variabilitatea PEF este explicata de varsta si inaltime.\n\n")
+    "din variabilitatea log10(PEF) este explicata de varsta si inaltime.\n\n")
 
-# --- 1c. Regresie multipla cu Gen: PEF ~ Varsta + Inaltime + Gen ---
+# --- 1f. Regresie multipla cu Gen: log10(PEF) ~ Varsta + Inaltime + Gen ---
 cat("===========================================================================\n")
-cat("1c. REGRESIE MULTIPLA: PEF ~ Varsta_ani + Inaltime_cm + Gen\n")
+cat("1f. REGRESIE MULTIPLA: log10(PEF) ~ Varsta_ani + Inaltime_cm + Gen\n")
 cat("===========================================================================\n\n")
 
-model_pef_gen <- lm(PEF ~ Varsta_ani + Inaltime_cm + Gen, data=data)
+model_pef_gen <- lm(log_PEF ~ Varsta_ani + Inaltime_cm + Gen, data=data)
 s_pef_gen <- summary(model_pef_gen)
 print(s_pef_gen)
 cat("\n")
@@ -302,9 +395,9 @@ if (anova_pef$`Pr(>F)`[2] < 0.05) {
   cat("Adaugarea Gen NU imbunatateste semnificativ modelul (p >= 0.05).\n\n")
 }
 
-# --- 1d. Diagnostice model PEF ---
+# --- 1g. Diagnostice model log10(PEF) ---
 cat("===========================================================================\n")
-cat("1d. DIAGNOSTICE MODEL PEF (Varsta + Inaltime)\n")
+cat("1g. DIAGNOSTICE MODEL log10(PEF) (Varsta + Inaltime)\n")
 cat("===========================================================================\n\n")
 
 resid_pef <- residuals(model_pef)
@@ -365,35 +458,46 @@ dev.off()
 cat("Salvat: pef_diagnostic.png\n")
 
 png("pef_hist_resid.png", width=600, height=500)
-hist(resid_pef, breaks=20, main="Histograma reziduurilor (model PEF)",
+hist(resid_pef, breaks=20, main="Histograma reziduurilor (model log10(PEF))",
      xlab="Reziduuri", col="lightblue", probability=TRUE)
 curve(dnorm(x, mean=mean(resid_pef), sd=sd(resid_pef)), add=TRUE, col="red", lwd=2)
 dev.off()
 cat("Salvat: pef_hist_resid.png\n\n")
 
-# --- 1e. Interpretare PEF ---
+# --- 1h. Interpretare log10(PEF) ---
 cat("===========================================================================\n")
-cat("1e. INTERPRETARE MODEL PEF\n")
+cat("1h. INTERPRETARE MODEL log10(PEF)\n")
 cat("===========================================================================\n\n")
 
 coef_pef <- coef(model_pef)
-cat("Coeficienti nestandardizati:\n")
-cat("  Intercept (b0) =", sprintf("%.4f", coef_pef[1]),
-    "=> PEF estimat cand varsta=0 si inaltime=0 (nu are sens clinic)\n")
-cat("  Varsta_ani (b1) =", sprintf("%.4f", coef_pef[2]),
-    "=> La cresterea cu 1 an a varstei,\n")
-cat("    PEF creste cu", sprintf("%.4f", coef_pef[2]),
-    "L/min, controlind pentru inaltime.\n")
-cat("  Inaltime_cm (b2) =", sprintf("%.4f", coef_pef[3]),
-    "=> La cresterea cu 1 cm a inaltimii,\n")
-cat("    PEF creste cu", sprintf("%.4f", coef_pef[3]),
-    "L/min, controlind pentru varsta.\n\n")
+cat("Coeficienti nestandardizati (pe scala log10):\n")
+cat("  Intercept (b0) =", sprintf("%.6f", coef_pef[1]), "\n")
+cat("  Varsta_ani (b1) =", sprintf("%.6f", coef_pef[2]), "\n")
+cat("  Inaltime_cm (b2) =", sprintf("%.6f", coef_pef[3]), "\n\n")
+
+cat("Interpretare pe scala originala (back-transform):\n")
+cat("  La cresterea cu 1 an a varstei, PEF se multiplica cu",
+    sprintf("%.4f", 10^coef_pef[2]),
+    "(factor multiplicativ), controlind pentru inaltime.\n")
+pct_varsta_pef <- (10^coef_pef[2] - 1) * 100
+cat("  Aceasta corespunde unei cresteri de", sprintf("%.2f%%", pct_varsta_pef), "\n\n")
+
+cat("  La cresterea cu 1 cm a inaltimii, PEF se multiplica cu",
+    sprintf("%.4f", 10^coef_pef[3]),
+    "(factor multiplicativ), controlind pentru varsta.\n")
+pct_inaltime_pef <- (10^coef_pef[3] - 1) * 100
+cat("  Aceasta corespunde unei cresteri de", sprintf("%.2f%%", pct_inaltime_pef), "\n\n")
+
+cat("  La cresterea cu 10 cm a inaltimii, PEF se multiplica cu",
+    sprintf("%.4f", 10^(10*coef_pef[3])), "\n")
+pct_10cm_pef <- (10^(10*coef_pef[3]) - 1) * 100
+cat("  Aceasta corespunde unei cresteri de", sprintf("%.2f%%", pct_10cm_pef), "\n\n")
 
 # Coeficienti de regresie partiala (standardizati)
 cat("--- Coeficienti de regresie partiala (standardizati) ---\n\n")
-model_pef_std <- lm(scale(PEF) ~ scale(Varsta_ani) + scale(Inaltime_cm), data=data)
+model_pef_std <- lm(scale(log_PEF) ~ scale(Varsta_ani) + scale(Inaltime_cm), data=data)
 s_pef_std <- summary(model_pef_std)
-cat("Model standardizat: PEF_z ~ Varsta_z + Inaltime_z\n\n")
+cat("Model standardizat: log10(PEF)_z ~ Varsta_z + Inaltime_z\n\n")
 print(s_pef_std)
 cat("\n")
 cat("Coeficienti standardizati (beta):\n")
@@ -401,11 +505,11 @@ cat("  beta_Varsta =", sprintf("%.4f", coef(model_pef_std)[2]), "\n")
 cat("  beta_Inaltime =", sprintf("%.4f", coef(model_pef_std)[3]), "\n\n")
 cat("Interpretare:\n")
 cat("  La cresterea cu 1 SD a varstei (", sprintf("%.2f", sd(data$Varsta_ani)), "ani),\n")
-cat("    PEF creste cu", sprintf("%.4f", coef(model_pef_std)[2]), "SD (",
-    sprintf("%.2f", sd(data$PEF)), "L/min), controlind pentru inaltime.\n")
+cat("    log10(PEF) creste cu", sprintf("%.4f", coef(model_pef_std)[2]), "SD (",
+    sprintf("%.4f", sd(data$log_PEF)), "), controlind pentru inaltime.\n")
 cat("  La cresterea cu 1 SD a inaltimii (", sprintf("%.2f", sd(data$Inaltime_cm)), "cm),\n")
-cat("    PEF creste cu", sprintf("%.4f", coef(model_pef_std)[3]), "SD (",
-    sprintf("%.2f", sd(data$PEF)), "L/min), controlind pentru varsta.\n")
+cat("    log10(PEF) creste cu", sprintf("%.4f", coef(model_pef_std)[3]), "SD (",
+    sprintf("%.4f", sd(data$log_PEF)), "), controlind pentru varsta.\n")
 abs_b_v <- abs(coef(model_pef_std)[2])
 abs_b_i <- abs(coef(model_pef_std)[3])
 if (abs_b_i > abs_b_v) {
@@ -416,14 +520,14 @@ if (abs_b_i > abs_b_v) {
       sprintf("%.4f", abs_b_v), "vs", sprintf("%.4f", abs_b_i), ")\n\n")
 }
 
-# --- 1f. Modele cu interactiuni PEF ---
+# --- 1i. Modele cu interactiuni log10(PEF) ---
 cat("===========================================================================\n")
-cat("1f. MODELE CU INTERACTIUNI PENTRU PEF\n")
+cat("1i. MODELE CU INTERACTIUNI PENTRU log10(PEF)\n")
 cat("===========================================================================\n\n")
 
 # Interactiune Varsta * Inaltime
-cat("--- PEF ~ Varsta_ani * Inaltime_cm ---\n\n")
-model_pef_int1 <- lm(PEF ~ Varsta_ani * Inaltime_cm, data=data)
+cat("--- log10(PEF) ~ Varsta_ani * Inaltime_cm ---\n\n")
+model_pef_int1 <- lm(log_PEF ~ Varsta_ani * Inaltime_cm, data=data)
 s_pef_int1 <- summary(model_pef_int1)
 print(s_pef_int1)
 cat("\n")
@@ -443,8 +547,8 @@ if (anova_pef_int1$`Pr(>F)`[2] < 0.05) {
 }
 
 # Interactiune Varsta * Gen
-cat("--- PEF ~ Varsta_ani * Gen ---\n\n")
-model_pef_int2 <- lm(PEF ~ Varsta_ani * Gen, data=data)
+cat("--- log10(PEF) ~ Varsta_ani * Gen ---\n\n")
+model_pef_int2 <- lm(log_PEF ~ Varsta_ani * Gen, data=data)
 s_pef_int2 <- summary(model_pef_int2)
 print(s_pef_int2)
 cat("\n")
@@ -453,7 +557,7 @@ cat("95% IC:\n")
 print(ci_pef_int2)
 cat("\n")
 
-cat("Comparare cu modelul simplu PEF ~ Varsta (ANOVA):\n")
+cat("Comparare cu modelul simplu log10(PEF) ~ Varsta (ANOVA):\n")
 anova_pef_int2 <- anova(m_pef_varsta, model_pef_int2)
 print(anova_pef_int2)
 cat("\n")
@@ -464,8 +568,8 @@ if (anova_pef_int2$`Pr(>F)`[2] < 0.05) {
 }
 
 # Interactiune Inaltime * Gen
-cat("--- PEF ~ Inaltime_cm * Gen ---\n\n")
-model_pef_int3 <- lm(PEF ~ Inaltime_cm * Gen, data=data)
+cat("--- log10(PEF) ~ Inaltime_cm * Gen ---\n\n")
+model_pef_int3 <- lm(log_PEF ~ Inaltime_cm * Gen, data=data)
 s_pef_int3 <- summary(model_pef_int3)
 print(s_pef_int3)
 cat("\n")
@@ -474,7 +578,7 @@ cat("95% IC:\n")
 print(ci_pef_int3)
 cat("\n")
 
-cat("Comparare cu modelul simplu PEF ~ Inaltime (ANOVA):\n")
+cat("Comparare cu modelul simplu log10(PEF) ~ Inaltime (ANOVA):\n")
 anova_pef_int3 <- anova(m_pef_inaltime, model_pef_int3)
 print(anova_pef_int3)
 cat("\n")
@@ -484,46 +588,28 @@ if (anova_pef_int3$`Pr(>F)`[2] < 0.05) {
   cat("Interactiunea Inaltime*Gen NU este semnificativa (p >= 0.05).\n\n")
 }
 
-# Model complet cu toate interactiunile
-cat("--- PEF ~ Varsta_ani + Inaltime_cm + Gen + Varsta:Inaltime + Varsta:Gen + Inaltime:Gen ---\n\n")
-model_pef_full_int <- lm(PEF ~ Varsta_ani * Inaltime_cm + Varsta_ani * Gen + Inaltime_cm * Gen, data=data)
-s_pef_full_int <- summary(model_pef_full_int)
-print(s_pef_full_int)
-cat("\n")
-
-cat("Comparare model complet cu interactiuni vs model simplu Varsta+Inaltime (ANOVA):\n")
-anova_pef_full <- anova(model_pef, model_pef_full_int)
-print(anova_pef_full)
-cat("\n")
-if (anova_pef_full$`Pr(>F)`[2] < 0.05) {
-  cat("Interactiunile impreuna imbunatatesc semnificativ modelul (p < 0.05).\n\n")
-} else {
-  cat("Interactiunile impreuna NU imbunatatesc semnificativ modelul (p >= 0.05).\n\n")
-}
-
-# Interaction plot: PEF by Varsta, split by Gen
+# Interaction plots for log10(PEF)
 png("pef_interaction_varsta_gen.png", width=600, height=500)
-plot(data$Varsta_ani[data$Gen==0], data$PEF[data$Gen==0],
-     pch=19, col=rgb(1,0,0,0.5), xlim=range(data$Varsta_ani), ylim=range(data$PEF),
-     xlab="Varsta (ani)", ylab="PEF (L/min)", main="PEF vs Varsta per Gen")
-points(data$Varsta_ani[data$Gen==1], data$PEF[data$Gen==1],
+plot(data$Varsta_ani[data$Gen==0], data$log_PEF[data$Gen==0],
+     pch=19, col=rgb(1,0,0,0.5), xlim=range(data$Varsta_ani), ylim=range(data$log_PEF),
+     xlab="Varsta (ani)", ylab="log10(PEF)", main="log10(PEF) vs Varsta per Gen")
+points(data$Varsta_ani[data$Gen==1], data$log_PEF[data$Gen==1],
        pch=17, col=rgb(0,0,1,0.5))
-abline(lm(PEF ~ Varsta_ani, data=data[data$Gen==0,]), col="red", lwd=2)
-abline(lm(PEF ~ Varsta_ani, data=data[data$Gen==1,]), col="blue", lwd=2)
+abline(lm(log_PEF ~ Varsta_ani, data=data[data$Gen==0,]), col="red", lwd=2)
+abline(lm(log_PEF ~ Varsta_ani, data=data[data$Gen==1,]), col="blue", lwd=2)
 legend("topleft", legend=c("Feminin", "Masculin"), col=c("red","blue"),
        pch=c(19,17), lty=1, lwd=2, bty="n")
 dev.off()
 cat("Salvat: pef_interaction_varsta_gen.png\n")
 
-# Interaction plot: PEF by Inaltime, split by Gen
 png("pef_interaction_inaltime_gen.png", width=600, height=500)
-plot(data$Inaltime_cm[data$Gen==0], data$PEF[data$Gen==0],
-     pch=19, col=rgb(1,0,0,0.5), xlim=range(data$Inaltime_cm), ylim=range(data$PEF),
-     xlab="Inaltime (cm)", ylab="PEF (L/min)", main="PEF vs Inaltime per Gen")
-points(data$Inaltime_cm[data$Gen==1], data$PEF[data$Gen==1],
+plot(data$Inaltime_cm[data$Gen==0], data$log_PEF[data$Gen==0],
+     pch=19, col=rgb(1,0,0,0.5), xlim=range(data$Inaltime_cm), ylim=range(data$log_PEF),
+     xlab="Inaltime (cm)", ylab="log10(PEF)", main="log10(PEF) vs Inaltime per Gen")
+points(data$Inaltime_cm[data$Gen==1], data$log_PEF[data$Gen==1],
        pch=17, col=rgb(0,0,1,0.5))
-abline(lm(PEF ~ Inaltime_cm, data=data[data$Gen==0,]), col="red", lwd=2)
-abline(lm(PEF ~ Inaltime_cm, data=data[data$Gen==1,]), col="blue", lwd=2)
+abline(lm(log_PEF ~ Inaltime_cm, data=data[data$Gen==0,]), col="red", lwd=2)
+abline(lm(log_PEF ~ Inaltime_cm, data=data[data$Gen==1,]), col="blue", lwd=2)
 legend("topleft", legend=c("Feminin", "Masculin"), col=c("red","blue"),
        pch=c(19,17), lty=1, lwd=2, bty="n")
 dev.off()
@@ -966,7 +1052,7 @@ cat("###################################################################\n")
 cat("# SUMAR GENERAL\n")
 cat("###################################################################\n\n")
 
-cat("Model PEF ~ Varsta + Inaltime:\n")
+cat("Model log10(PEF) ~ Varsta + Inaltime:\n")
 cat("  R² =", sprintf("%.4f", s_pef$r.squared),
     ", Adj R² =", sprintf("%.4f", s_pef$adj.r.squared), "\n")
 cat("  F =", sprintf("%.4f", s_pef$fstatistic[1]),

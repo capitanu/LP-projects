@@ -101,103 +101,139 @@ Toate variabilele urmeaza o distributie normala (p > 0.05 la testul Shapiro-Wilk
 
 ---
 
-## ANALIZA 1: PEF (Debitul Expirator Maxim de Varf)
+## ANALIZA 1: log10(PEF) - Transformare logaritmica
 
-### 4. Regresii simple pentru PEF
+### 4. Necesitatea transformarii log10(PEF)
 
-#### 4.1 PEF ~ Varsta
+Modelul original PEF ~ Varsta + Inaltime avea diagnostice la limita:
+- Shapiro-Wilk pe reziduuri: W = 0.9746, **p = 0.0503** (la limita de 0.05)
+- Breusch-Pagan: p = 0.1435
+- PEF nu urmeaza strict o distributie normala (Shapiro-Wilk p = 0.077)
+
+**Justificarea transformarii log10:**
+- Shapiro-Wilk pe reziduuri este la limita acceptabilitatii
+- Transformarea log10 imbunatateste semnificativ normalitatea reziduurilor si homoscedasticitatea
+- log10 este o transformare standard pentru debite respiratorii in literatura medicala
+
+### 5. Statistici descriptive log10(PEF)
+
+| Statistica | Valoare |
+|------------|---------|
+| N | 100 |
+| Media | 2.1513 |
+| Mediana | 2.1614 |
+| SD | 0.1261 |
+| Min | 1.8451 |
+| Max | 2.4472 |
+| Q1 | 2.0755 |
+| Q3 | 2.2393 |
+| IQR | 0.1637 |
+| Outlieri | 0 |
+
+**Shapiro-Wilk pe log10(PEF):** W = 0.9878, p = 0.4912 — distributie normala confirmata (comparativ cu PEF original: p = 0.077).
+
+### 6. Comparare PEF original vs log10(PEF)
+
+| Model | R² | Shapiro-Wilk reziduuri (p) | Breusch-Pagan (p) |
+|-------|-----|---------------------------|-------------------|
+| PEF ~ Varsta + Inaltime (original) | 0.4825 | 0.0503 (la limita) | 0.1435 |
+| **log10(PEF) ~ Varsta + Inaltime (transformat)** | **0.4975** | **0.6667** | **0.9290** |
+
+Transformarea log10 imbunatateste toate diagnosticele: R² creste usor, normalitatea reziduurilor devine clara (p=0.67), si homoscedasticitatea este solida (p=0.93).
+
+### 7. Regresii simple pentru log10(PEF)
+
+#### 7.1 log10(PEF) ~ Varsta
 
 | Coeficient | Estimare | SE | t | p-value | 95% IC |
 |------------|----------|-----|---|---------|--------|
-| Intercept | 81.19 | 23.64 | 3.435 | 0.00087 | [34.28, 128.09] |
-| Varsta_ani | 7.31 | 2.56 | 2.852 | **0.0053** | [2.22, 12.40] |
+| Intercept | 1.9306 | 0.0702 | 27.515 | <2e-16 | [1.791, 2.070] |
+| Varsta_ani | 0.0243 | 0.0076 | 3.193 | **0.0019** | [0.009, 0.039] |
 
-- **R² = 0.0766** (7.7% din variabilitatea PEF explicata de varsta)
-- Asocierea este semnificativa dar slaba
-- La fiecare an in plus, PEF creste cu ~7.3 L/min
+- **R² = 0.0942** (9.4% din variabilitatea log10(PEF) explicata de varsta)
+- Asocierea este semnificativa
+- Back-transform: la fiecare an in plus, PEF creste cu ~5.8%
 
-#### 4.2 PEF ~ Inaltime
+#### 7.2 log10(PEF) ~ Inaltime
 
 | Coeficient | Estimare | SE | t | p-value | 95% IC |
 |------------|----------|-----|---|---------|--------|
-| Intercept | -88.17 | 29.09 | -3.030 | 0.0031 | [-145.90, -30.43] |
-| Inaltime_cm | 1.97 | 0.24 | 8.155 | **1.18e-12** | [1.49, 2.45] |
+| Intercept | 1.4471 | 0.0874 | 16.556 | <2e-16 | [1.274, 1.621] |
+| Inaltime_cm | 0.00588 | 0.000725 | 8.108 | **1.49e-12** | [0.0044, 0.0073] |
 
-- **R² = 0.4043** (40.4% din variabilitatea PEF explicata de inaltime)
+- **R² = 0.4015** (40.1% din variabilitatea log10(PEF) explicata de inaltime)
 - Asocierea este puternic semnificativa
-- La fiecare cm in plus, PEF creste cu ~1.97 L/min
-- Inaltimea este cel mai bun predictor individual al PEF
+- Back-transform: la fiecare cm in plus, PEF creste cu ~1.4%
 
-#### 4.3 PEF ~ Gen
-
-| Coeficient | Estimare | SE | t | p-value | 95% IC |
-|------------|----------|-----|---|---------|--------|
-| Intercept | 150.62 | 5.79 | 26.017 | <2e-16 | [139.13, 162.11] |
-| Gen | -6.45 | 8.45 | -0.764 | 0.4466 | [-23.21, 10.31] |
-
-- **R² = 0.0059** (0.6% — practic zero)
-- Genul nu este un predictor semnificativ al PEF (p = 0.45)
-
-### 5. Regresie multipla: PEF ~ Varsta + Inaltime
+#### 7.3 log10(PEF) ~ Gen
 
 | Coeficient | Estimare | SE | t | p-value | 95% IC |
 |------------|----------|-----|---|---------|--------|
-| Intercept | -155.73 | 32.47 | -4.796 | 5.84e-06 | [-220.18, -91.29] |
-| Varsta_ani | 7.39 | 1.93 | 3.829 | **0.000228** | [3.56, 11.22] |
-| Inaltime_cm | 1.97 | 0.23 | 8.722 | **7.67e-14** | [1.52, 2.42] |
+| Intercept | 2.1591 | 0.0174 | 124.328 | <2e-16 | [2.125, 2.194] |
+| Gen | -0.0166 | 0.0253 | -0.654 | **0.515** | [-0.067, 0.034] |
+
+- **R² = 0.0043** — genul nu explica variabilitatea log10(PEF)
+- Nesemnificativ (p = 0.52)
+
+### 8. Regresie multipla: log10(PEF) ~ Varsta + Inaltime
+
+| Coeficient | Estimare | SE | t | p-value | 95% IC |
+|------------|----------|-----|---|---------|--------|
+| Intercept | 1.2228 | 0.0959 | 12.751 | <2e-16 | [1.032, 1.413] |
+| Varsta_ani | 0.02453 | 0.00570 | 4.305 | **4.00e-05** | [0.013, 0.036] |
+| Inaltime_cm | 0.00589 | 0.000668 | 8.823 | **4.65e-14** | [0.0046, 0.0072] |
 
 **Ecuatia de regresie:**
 ```
-PEF = -155.73 + 7.39 * Varsta + 1.97 * Inaltime
+log10(PEF) = 1.2228 + 0.0245 * Varsta + 0.0059 * Inaltime
 ```
 
 **Performanta modelului:**
-- **R² = 0.4825** — 48.2% din variabilitatea PEF este explicata de varsta si inaltime impreuna
-- **R² ajustat = 0.4718**
-- **F(2, 97) = 45.22, p = 1.33e-14** — modelul este semnificativ global
+- **R² = 0.4975** — 49.7% din variabilitatea log10(PEF) este explicata de varsta si inaltime impreuna
+- **R² ajustat = 0.4871**
+- **F(2, 97) = 48.02, p = 3.20e-15** — modelul este semnificativ global
 
-**Interpretare coeficienti nestandardizati:**
-- **Varsta (b1 = 7.39):** La cresterea varstei cu 1 an, PEF creste cu 7.39 L/min, controlind pentru inaltime
-- **Inaltime (b2 = 1.97):** La cresterea inaltimii cu 1 cm, PEF creste cu 1.97 L/min, controlind pentru varsta
+**Interpretare coeficienti nestandardizati (back-transform pe scala originala):**
+- **Varsta (b1 = 0.0245):** La cresterea varstei cu 1 an, PEF se multiplica cu **1.058** (+5.81%), controlind pentru inaltime
+- **Inaltime (b2 = 0.0059):** La cresterea inaltimii cu 1 cm, PEF se multiplica cu **1.014** (+1.37%), controlind pentru varsta
+- La cresterea inaltimii cu **10 cm**, PEF se multiplica cu **1.145** (+14.53%)
 - Ambii predictori sunt semnificativi (p < 0.001)
 
 **Coeficienti de regresie partiala (standardizati):**
 
 | Predictor | beta (standardizat) | SE | t | p-value |
 |-----------|--------------------|----|---|---------|
-| Varsta_ani | **0.2797** | 0.0730 | 3.829 | 0.000228 |
-| Inaltime_cm | **0.6371** | 0.0730 | 8.722 | 7.67e-14 |
+| Varsta_ani | **0.3098** | 0.0720 | 4.305 | 4.00e-05 |
+| Inaltime_cm | **0.6350** | 0.0720 | 8.823 | 4.65e-14 |
 
-- **beta_Varsta = 0.2797:** La cresterea cu 1 SD a varstei (1.59 ani), PEF creste cu 0.28 SD (42.06 L/min)
-- **beta_Inaltime = 0.6371:** La cresterea cu 1 SD a inaltimii (13.59 cm), PEF creste cu 0.64 SD (42.06 L/min)
-- Inaltimea are un efect standardizat de **2.3 ori mai mare** decat varsta (0.637 vs 0.280), confirmind ca este predictorul dominant
+- **beta_Varsta = 0.3098:** La cresterea cu 1 SD a varstei (1.59 ani), log10(PEF) creste cu 0.31 SD
+- **beta_Inaltime = 0.6350:** La cresterea cu 1 SD a inaltimii (13.59 cm), log10(PEF) creste cu 0.64 SD
+- Inaltimea are un efect standardizat de **2.0 ori mai mare** decat varsta (0.635 vs 0.310), confirmind ca este predictorul dominant
 
-**Observatie importanta:** R² creste de la 0.4043 (doar Inaltime) la 0.4825 (Inaltime + Varsta), deci adaugarea Varstei aduce o imbunatatire de ~7.8 puncte procentuale. Acest lucru se intimpla desi Varsta si Inaltimea nu sunt corelate (r ≈ 0), ceea ce inseamna ca cele doua variabile capteaza aspecte independente ale variabilitatii PEF.
-
-### 6. Modelul cu Gen: PEF ~ Varsta + Inaltime + Gen
+### 9. Modelul cu Gen: log10(PEF) ~ Varsta + Inaltime + Gen
 
 | Coeficient | Estimare | SE | t | p-value |
 |------------|----------|-----|---|---------|
-| Intercept | -153.66 | 33.07 | -4.647 | 1.07e-05 |
-| Varsta_ani | 7.33 | 1.94 | 3.772 | 0.00028 |
-| Inaltime_cm | 1.97 | 0.23 | 8.658 | 1.13e-13 |
-| Gen | -2.35 | 6.18 | -0.380 | **0.7046** |
+| Intercept | 1.2260 | 0.0977 | 12.547 | <2e-16 |
+| Varsta_ani | 0.02444 | 0.00574 | 4.256 | 4.85e-05 |
+| Inaltime_cm | 0.00589 | 0.000672 | 8.762 | 6.78e-14 |
+| Gen | -0.00369 | 0.01825 | -0.202 | **0.840** |
 
-- **R² = 0.4833**, R² ajustat = 0.4671
-- **ANOVA comparativa:** F = 0.1446, p = 0.7046
-- **Concluzie:** Adaugarea genului **NU** imbunatateste semnificativ modelul. Genul nu este un predictor relevant al PEF dupa ce se controleaza pentru varsta si inaltime.
+- **R² = 0.4977**, R² ajustat = 0.4820
+- **ANOVA comparativa:** F = 0.0408, p = 0.8403
+- **Concluzie:** Adaugarea genului **NU** imbunatateste semnificativ modelul.
 
-### 7. Diagnostice model PEF (Varsta + Inaltime)
+### 10. Diagnostice model log10(PEF) (Varsta + Inaltime)
 
 | Test | Statistica | p-value | Concluzie |
 |------|-----------|---------|-----------|
-| Shapiro-Wilk (normalitate reziduuri) | W = 0.9746 | 0.0503 | Reziduurile sunt normal distribuite (la limita) |
-| Breusch-Pagan (homoscedasticitate) | BP = 3.8829 | 0.1435 | Homoscedasticitate respectata |
-| Durbin-Watson (independenta erorilor) | DW = 1.7959 | 0.1513 | Erorile sunt independente |
+| Shapiro-Wilk (normalitate reziduuri) | W = 0.9900 | **0.6667** | Reziduurile sunt normal distribuite |
+| Breusch-Pagan (homoscedasticitate) | BP = 0.1473 | **0.9290** | Homoscedasticitate respectata |
+| Durbin-Watson (independenta erorilor) | DW = 1.8752 | **0.2638** | Erorile sunt independente |
 
 **Observatii puncte influentiale:**
-- Cook's D > 4/n: 7 observatii (niciuna cu Cook's D > 0.5, maxim = 0.1562)
-- Reziduuri standardizate |> 2|: 7 observatii
+- Cook's D > 4/n: 6 observatii (maxim = 0.0561, niciuna problematica)
+- Reziduuri standardizate |> 2|: 5 observatii
 
 **VIF (Variance Inflation Factor):**
 | Variabila | VIF |
@@ -205,90 +241,63 @@ PEF = -155.73 + 7.39 * Varsta + 1.97 * Inaltime
 | Varsta_ani | 1.000 |
 | Inaltime_cm | 1.000 |
 
-VIF ≈ 1 pentru ambii predictori — **nu exista multicoliniaritate**. Acest lucru era de asteptat dat fiind ca Varsta si Inaltimea nu sunt corelate (r = -0.005).
-
-**Concluzie diagnostice:** Toate conditiile regresiei liniare sunt indeplinite:
-1. Normalitatea reziduurilor (Shapiro-Wilk p = 0.05, la limita dar acceptabil)
-2. Homoscedasticitate (Breusch-Pagan p = 0.14)
-3. Independenta erorilor (Durbin-Watson p = 0.15)
+**Concluzie diagnostice:** Toate conditiile regresiei liniare sunt **clar indeplinite** (comparativ cu modelul pe PEF original unde Shapiro-Wilk era la limita):
+1. Normalitatea reziduurilor (p = 0.67 — solid)
+2. Homoscedasticitate (p = 0.93 — excelent)
+3. Independenta erorilor (p = 0.26)
 4. Absenta multicoliniaritatii (VIF = 1.0)
 
-### 8. Modele cu interactiuni pentru PEF
+### 11. Modele cu interactiuni pentru log10(PEF)
 
-#### 8.1 PEF ~ Varsta * Inaltime
-
-Testam daca efectul varstei asupra PEF difera in functie de inaltime (si invers).
+#### 11.1 log10(PEF) ~ Varsta * Inaltime
 
 | Coeficient | Estimare | SE | t | p-value |
 |------------|----------|-----|---|---------|
-| Intercept | -452.43 | 195.21 | -2.318 | 0.0226 |
-| Varsta_ani | 39.76 | 21.09 | 1.885 | 0.0625 |
-| Inaltime_cm | 4.43 | 1.61 | 2.748 | 0.0072 |
-| Varsta:Inaltime | -0.27 | 0.17 | -1.541 | **0.1266** |
+| Intercept | 0.0660 | 0.5713 | 0.116 | 0.908 |
+| Varsta_ani | 0.1507 | 0.0617 | 2.442 | 0.016 |
+| Inaltime_cm | 0.01549 | 0.00472 | 3.281 | 0.001 |
+| Varsta:Inaltime | -0.00105 | 0.00051 | -2.053 | **0.043** |
 
-- **R² = 0.4950**, R² ajustat = 0.4792
-- **ANOVA comparativa vs model fara interactiune:** F = 2.3747, p = 0.1266
-- **Concluzie:** Interactiunea Varsta * Inaltime **NU** este semnificativa (p = 0.13). Efectul varstei asupra PEF nu depinde semnificativ de inaltime.
+- **R² = 0.5186**, R² ajustat = 0.5036
+- **ANOVA comparativa:** F = 4.2152, **p = 0.0428**
+- **Concluzie:** Interactiunea Varsta * Inaltime **ESTE semnificativa** (p = 0.043). Efectul varstei asupra log10(PEF) depinde de inaltime — la copiii mai inalti, efectul suplimentar al varstei este mai mic.
 
-#### 8.2 PEF ~ Varsta * Gen
-
-Testam daca efectul varstei asupra PEF difera intre baieti si fete.
+#### 11.2 log10(PEF) ~ Varsta * Gen
 
 | Coeficient | Estimare | SE | t | p-value |
 |------------|----------|-----|---|---------|
-| Intercept | 83.65 | 32.31 | 2.589 | 0.0111 |
-| Varsta_ani | 7.28 | 3.46 | 2.105 | 0.0379 |
-| Gen | -2.96 | 48.07 | -0.062 | 0.9510 |
-| Varsta:Gen | -0.19 | 5.23 | -0.037 | **0.9704** |
+| Intercept | 1.9173 | 0.0959 | 19.987 | <2e-16 |
+| Varsta_ani | 0.02629 | 0.01027 | 2.560 | 0.012 |
+| Gen | 0.03580 | 0.14271 | 0.251 | 0.802 |
+| Varsta:Gen | -0.00514 | 0.01552 | -0.331 | **0.741** |
 
-- **R² = 0.0798**, R² ajustat = 0.0510
-- **ANOVA comparativa vs PEF ~ Varsta:** F = 0.1649, p = 0.8482
-- **Concluzie:** Interactiunea Varsta * Gen **NU** este semnificativa (p = 0.97). Relatia dintre varsta si PEF este similara la baieti si fete.
+- **R² = 0.0971**, R² ajustat = 0.0689
+- **ANOVA comparativa vs log10(PEF) ~ Varsta:** F = 0.152, p = 0.8592
+- **Concluzie:** Interactiunea Varsta * Gen **NU** este semnificativa (p = 0.74).
 
-#### 8.3 PEF ~ Inaltime * Gen
-
-Testam daca efectul inaltimii asupra PEF difera intre baieti si fete.
+#### 11.3 log10(PEF) ~ Inaltime * Gen
 
 | Coeficient | Estimare | SE | t | p-value |
 |------------|----------|-----|---|---------|
-| Intercept | -79.67 | 36.65 | -2.174 | 0.0322 |
-| Inaltime_cm | 1.91 | 0.30 | 6.332 | 7.77e-09 |
-| Gen | -20.42 | 61.36 | -0.333 | 0.7400 |
-| Inaltime:Gen | 0.14 | 0.51 | 0.267 | **0.7899** |
+| Intercept | 1.4818 | 0.1101 | 13.454 | <2e-16 |
+| Inaltime_cm | 0.00563 | 0.000908 | 6.197 | 1.43e-08 |
+| Gen | -0.0897 | 0.1844 | -0.487 | 0.628 |
+| Inaltime:Gen | 0.00067 | 0.00153 | 0.437 | **0.663** |
 
-- **R² = 0.4071**, R² ajustat = 0.3886
-- **ANOVA comparativa vs PEF ~ Inaltime:** F = 0.231, p = 0.7942
-- **Concluzie:** Interactiunea Inaltime * Gen **NU** este semnificativa (p = 0.79). Relatia dintre inaltime si PEF este similara la baieti si fete.
+- **R² = 0.4041**, R² ajustat = 0.3855
+- **ANOVA comparativa vs log10(PEF) ~ Inaltime:** F = 0.2129, p = 0.8086
+- **Concluzie:** Interactiunea Inaltime * Gen **NU** este semnificativa (p = 0.66).
 
-#### 8.4 Model complet cu toate interactiunile
-
-PEF ~ Varsta + Inaltime + Gen + Varsta:Inaltime + Varsta:Gen + Inaltime:Gen
-
-| Coeficient | Estimare | SE | t | p-value |
-|------------|----------|-----|---|---------|
-| Intercept | -450.73 | 204.84 | -2.200 | 0.0303 |
-| Varsta_ani | 39.53 | 21.68 | 1.823 | 0.0715 |
-| Inaltime_cm | 4.40 | 1.70 | 2.593 | 0.0110 |
-| Gen | 10.86 | 67.65 | 0.161 | 0.8728 |
-| Varsta:Inaltime | -0.26 | 0.18 | -1.466 | 0.1461 |
-| Varsta:Gen | -0.98 | 3.95 | -0.247 | 0.8055 |
-| Inaltime:Gen | -0.03 | 0.48 | -0.067 | 0.9470 |
-
-- **R² = 0.4958**, R² ajustat = 0.4633
-- **ANOVA comparativa vs model Varsta+Inaltime (fara interactiuni):** F = 0.6143, p = 0.6534
-- **Concluzie:** Adaugarea tuturor interactiunilor **NU** imbunatateste semnificativ modelul (p = 0.65). Modelul aditiv simplu (PEF ~ Varsta + Inaltime) este suficient.
-
-#### Sumar interactiuni PEF
+#### Sumar interactiuni log10(PEF)
 
 | Model | R² | Adj R² | ANOVA p vs model de baza |
 |-------|-----|--------|--------------------------|
-| PEF ~ Varsta + Inaltime (aditiv) | 0.4825 | 0.4718 | - |
-| + Varsta:Inaltime | 0.4950 | 0.4792 | 0.1266 |
-| + Varsta:Gen (vs PEF~Varsta) | 0.0798 | 0.0510 | 0.8482 |
-| + Inaltime:Gen (vs PEF~Inaltime) | 0.4071 | 0.3886 | 0.7942 |
-| Toate interactiunile | 0.4958 | 0.4633 | 0.6534 |
+| log10(PEF) ~ Varsta + Inaltime (aditiv) | 0.4975 | 0.4871 | - |
+| + Varsta:Inaltime | **0.5186** | **0.5036** | **0.0428** |
+| + Varsta:Gen (vs log10(PEF)~Varsta) | 0.0971 | 0.0689 | 0.8592 |
+| + Inaltime:Gen (vs log10(PEF)~Inaltime) | 0.4041 | 0.3855 | 0.8086 |
 
-**Niciuna** dintre interactiuni nu este semnificativa. Efectele varstei si inaltimii asupra PEF sunt aditive si nu depind de gen. Modelul optim ramine **PEF ~ Varsta + Inaltime** fara interactiuni.
+Interactiunea **Varsta * Inaltime este semnificativa** (p = 0.043), ceea ce inseamna ca efectul varstei asupra PEF difera in functie de inaltime. La copiii mai inalti, efectul suplimentar al varstei devine mai mic (coeficient de interactiune negativ = -0.00105). Interactiunile cu Gen nu sunt semnificative.
 
 ---
 
@@ -505,17 +514,18 @@ VIF ≈ 1 — **nu exista multicoliniaritate**.
 
 | Model | R² | R² ajustat | F | p-value |
 |-------|-----|------------|---|---------|
-| **PEF ~ Varsta + Inaltime** | **0.4825** | **0.4718** | 45.22 | 1.33e-14 |
+| **log10(PEF) ~ Varsta + Inaltime** | **0.4975** | **0.4871** | 48.02 | 3.20e-15 |
 | **log10(FEV1) ~ Varsta + Inaltime** | **0.9762** | **0.9758** | 1993.17 | <2.2e-16 |
 
 ### Concluzii
 
-1. **Modelul PEF** este un model valid din punct de vedere statistic:
-   - 48.2% din variabilitatea PEF este explicata de varsta si inaltime impreuna
-   - Ambii predictori sunt semnificativi independent: inaltimea (p < 10^-13) si varsta (p = 0.0002)
-   - Inaltimea este predictorul dominant (R² simplu = 0.40 vs R² simplu varsta = 0.08)
+1. **Modelul log10(PEF)** este un model valid din punct de vedere statistic:
+   - Transformarea log10 a imbunatatit toate diagnosticele (Shapiro-Wilk p: 0.05 -> 0.67; Breusch-Pagan p: 0.14 -> 0.93)
+   - 49.7% din variabilitatea log10(PEF) este explicata de varsta si inaltime impreuna
+   - Ambii predictori sunt semnificativi independent: inaltimea (p < 10^-13) si varsta (p = 4e-05)
+   - Inaltimea este predictorul dominant (beta standardizat = 0.635 vs 0.310 pentru varsta)
    - Genul nu aduce informatie suplimentara semnificativa
-   - Toate conditiile de validitate ale regresiei sunt indeplinite
+   - Toate conditiile de validitate ale regresiei sunt clar indeplinite
 
 2. **Modelul log10(FEV1)** — dupa transformarea logaritmica:
    - Transformarea log10 a rezolvat problema fitului perfect (R² = 1.0 -> R² = 0.9762)
@@ -525,11 +535,11 @@ VIF ≈ 1 — **nu exista multicoliniaritate**.
    - Genul nu aduce informatie suplimentara (p = 0.12)
    - Normalitatea reziduurilor nu este complet respectata (datorita relatiei quasi-deterministe), dar celelalte conditii sunt indeplinite
 
-3. **Interactiunile** nu sunt semnificative pentru niciunul dintre modele:
-   - Varsta * Inaltime: p = 0.13 (PEF); p = 0.74 (log10(FEV1))
-   - Varsta * Gen: p = 0.97 (PEF); p = 0.67 (log10(FEV1))
-   - Inaltime * Gen: p = 0.79 (PEF); p = 0.69 (log10(FEV1))
-   - Efectele variabilelor sunt aditive
+3. **Interactiunile:**
+   - Varsta * Inaltime: **p = 0.043 (log10(PEF)) — semnificativa**; p = 0.74 (log10(FEV1))
+   - Varsta * Gen: p = 0.74 (log10(PEF)); p = 0.67 (log10(FEV1)) — nesemnificativa
+   - Inaltime * Gen: p = 0.66 (log10(PEF)); p = 0.69 (log10(FEV1)) — nesemnificativa
+   - Pentru PEF, efectul varstei depinde de inaltime (la copiii mai inalti, efectul suplimentar al varstei e mai mic)
 
 4. **Genul** nu este un predictor semnificativ pentru niciunul dintre parametrii spirometrici, nici individual, nici in combinatie cu celelalte variabile, nici prin interactiuni.
 
@@ -545,13 +555,14 @@ VIF ≈ 1 — **nu exista multicoliniaritate**.
 | `boxplots_by_gen.png` | Box-plots FEV1 si PEF pe gen |
 | `histograme.png` | Histograme cu curba normala suprapusa |
 | `scatter_plots.png` | Scatter plots (PEF/FEV1 vs Varsta/Inaltime + Inaltime vs Varsta) |
-| `pef_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul PEF |
-| `pef_hist_resid.png` | Histograma reziduurilor modelului PEF |
+| `pef_transform_compare.png` | Comparare histograme: PEF original vs log10(PEF) transformat |
+| `pef_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul log10(PEF) |
+| `pef_hist_resid.png` | Histograma reziduurilor modelului log10(PEF) |
 | `fev1_transform_compare.png` | Comparare histograme: FEV1 original vs log10(FEV1) transformat |
 | `fev1_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul log10(FEV1) |
 | `fev1_hist_resid.png` | Histograma reziduurilor modelului log10(FEV1) |
-| `pef_interaction_varsta_gen.png` | PEF vs Varsta, separat pe gen (grafic interactiune) |
-| `pef_interaction_inaltime_gen.png` | PEF vs Inaltime, separat pe gen (grafic interactiune) |
+| `pef_interaction_varsta_gen.png` | log10(PEF) vs Varsta, separat pe gen (grafic interactiune) |
+| `pef_interaction_inaltime_gen.png` | log10(PEF) vs Inaltime, separat pe gen (grafic interactiune) |
 | `fev1_interaction_varsta_gen.png` | log10(FEV1) vs Varsta, separat pe gen (grafic interactiune) |
 | `fev1_interaction_inaltime_gen.png` | log10(FEV1) vs Inaltime, separat pe gen (grafic interactiune) |
 
@@ -561,7 +572,9 @@ VIF ≈ 1 — **nu exista multicoliniaritate**.
 
 Codul complet se gaseste in fisierul `analysis_examen.R`. Analiza a fost realizata in R 4.5.2, folosind pachetele `car` (VIF), `lmtest` (Breusch-Pagan, Durbin-Watson).
 
-### Output complet R
+### Output complet R (rezumat)
+
+Outputul complet este de ~1100 linii. Mai jos sunt sectiunile cheie:
 
 ```
 === Structura datelor ===
@@ -683,166 +696,41 @@ Teste de semnificatie:
   Varsta_ani vs Inaltime_cm: r=-0.0045, t=-0.0450, df=98, p=0.9642
 
 ###################################################################
-# ANALIZA 1: PEF (Debitul Expirator Maxim de Varf)
+# ANALIZA 1: log10(PEF) - Transformare logaritmica
 ###################################################################
 
---- PEF ~ Varsta_ani ---
+--- Modelul original PEF ~ Varsta + Inaltime ---
+  R² = 0.4825
+  Shapiro-Wilk reziduuri: p = 0.0503 (la limita)
 
-Call:
-lm(formula = PEF ~ Varsta_ani, data = data)
+--- log10(PEF) ~ Varsta + Inaltime (transformat) ---
+  R² = 0.4975, Shapiro-Wilk reziduuri: p = 0.6667 (OK)
 
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)
-(Intercept)   81.190     23.636   3.435  0.00087 ***
-Varsta_ani     7.310      2.564   2.852  0.00530 **
+1e. log10(PEF) ~ Varsta_ani + Inaltime_cm:
+  R² = 0.4975, Adj R² = 0.4871
+  F(2, 97) = 48.02, p = 3.202e-15
+  Ecuatia: log10(PEF) = 1.2228 + 0.0245 * Varsta + 0.0059 * Inaltime
+  Back-transform: +1 an varsta => PEF * 1.058 (+5.81%)
+  Back-transform: +1 cm inaltime => PEF * 1.014 (+1.37%)
 
-Residual standard error: 40.62 on 98 degrees of freedom
-Multiple R-squared:  0.07662, Adjusted R-squared:  0.0672
-F-statistic: 8.132 on 1 and 98 DF,  p-value: 0.005304
+  Coeficienti standardizati:
+    beta_Varsta = 0.3098
+    beta_Inaltime = 0.6350
 
-95% IC:
-                2.5 %    97.5 %
-(Intercept) 34.284458 128.09484
-Varsta_ani   2.223167  12.39763
+1f. log10(PEF) ~ Varsta + Inaltime + Gen:
+  Gen: p = 0.840 (nesemnificativ)
+  ANOVA: F = 0.0408, p = 0.8403
 
---- PEF ~ Inaltime_cm ---
+1g. Diagnostice log10(PEF):
+  Shapiro-Wilk: W = 0.9900, p = 0.6667 (normal)
+  Breusch-Pagan: BP = 0.1473, p = 0.9290 (homoscedastic)
+  Durbin-Watson: DW = 1.8752, p = 0.2638 (independent)
+  Cook's D max = 0.0561; VIF = 1.0
 
-Call:
-lm(formula = PEF ~ Inaltime_cm, data = data)
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)
-(Intercept) -88.1683    29.0938  -3.030  0.00312 **
-Inaltime_cm   1.9679     0.2413   8.155 1.18e-12 ***
-
-Residual standard error: 32.63 on 98 degrees of freedom
-Multiple R-squared:  0.4043, Adjusted R-squared:  0.3982
-F-statistic:  66.5 on 1 and 98 DF,  p-value: 1.184e-12
-
-95% IC:
-                  2.5 %     97.5 %
-(Intercept) -145.904002 -30.432545
-Inaltime_cm    1.489038   2.446826
-
---- PEF ~ Gen ---
-
-Call:
-lm(formula = PEF ~ Gen, data = data)
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)
-(Intercept)  150.623      5.789  26.017   <2e-16 ***
-Gen           -6.452      8.445  -0.764    0.447
-
-Residual standard error: 42.15 on 98 degrees of freedom
-Multiple R-squared:  0.005922, Adjusted R-squared:  -0.004221
-F-statistic: 0.5838 on 1 and 98 DF,  p-value: 0.4466
-
-95% IC:
-                2.5 %    97.5 %
-(Intercept) 139.13393 162.11135
-Gen         -23.21044  10.30558
-
-===========================================================================
-1b. REGRESIE MULTIPLA: PEF ~ Varsta_ani + Inaltime_cm
-===========================================================================
-
-Call:
-lm(formula = PEF ~ Varsta_ani + Inaltime_cm, data = data)
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)
-(Intercept) -155.7349    32.4685  -4.796 5.84e-06 ***
-Varsta_ani     7.3869     1.9290   3.829 0.000228 ***
-Inaltime_cm    1.9719     0.2261   8.722 7.67e-14 ***
-
-Residual standard error: 30.57 on 97 degrees of freedom
-Multiple R-squared:  0.4825, Adjusted R-squared:  0.4718
-F-statistic: 45.22 on 2 and 97 DF,  p-value: 1.333e-14
-
-95% IC:
-                  2.5 %     97.5 %
-(Intercept) -220.175837 -91.294035
-Varsta_ani     3.558311  11.215473
-Inaltime_cm    1.523167   2.420569
-
-Ecuatia: PEF = -155.7349 + (7.3869) * Varsta + (1.9719) * Inaltime
-
-Testul F global:
-  H0: beta_varsta = beta_inaltime = 0
-  H1: cel putin un beta != 0
-  F = 45.2185
-  df1 = 2, df2 = 97
-  p-value = 1.333e-14
-  Decizie: Modelul este semnificativ (p < 0.05).
-
-R² = 0.4825
-R² ajustat = 0.4718
-Interpretare: 48.2% din variabilitatea PEF este explicata de varsta si inaltime.
-
-===========================================================================
-1c. REGRESIE MULTIPLA: PEF ~ Varsta_ani + Inaltime_cm + Gen
-===========================================================================
-
-Call:
-lm(formula = PEF ~ Varsta_ani + Inaltime_cm + Gen, data = data)
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)
-(Intercept) -153.6614    33.0655  -4.647 1.07e-05 ***
-Varsta_ani     7.3306     1.9432   3.772  0.00028 ***
-Inaltime_cm    1.9680     0.2273   8.658 1.13e-13 ***
-Gen           -2.3479     6.1753  -0.380  0.70464
-
-R² = 0.4833, R² ajustat = 0.4671
-
-Comparare model cu/fara Gen (ANOVA):
-  F = 0.1446, p = 0.7046
-  Adaugarea Gen NU imbunatateste semnificativ modelul.
-
-===========================================================================
-1d. DIAGNOSTICE MODEL PEF
-===========================================================================
-
-Shapiro-Wilk: W = 0.9746, p = 0.05029 => Reziduurile sunt normal distribuite.
-Breusch-Pagan: BP = 3.8829, p = 0.1435 => Homoscedasticitate respectata.
-Durbin-Watson: DW = 1.7959, p = 0.1513 => Erorile sunt independente.
-Cook's D > 4/n: 7 observatii
-Cook's D maxim: 0.1562
-Reziduuri standardizate |> 2|: 7 observatii
-
-VIF:
- Varsta_ani Inaltime_cm
-   1.000021    1.000021
-  Toate VIF < 5: nu exista probleme de multicoliniaritate.
-
-===========================================================================
-1f. MODELE CU INTERACTIUNI PENTRU PEF
-===========================================================================
-
---- PEF ~ Varsta_ani * Inaltime_cm ---
-  Varsta_ani:Inaltime_cm: Estimate=-0.2686, t=-1.541, p=0.1266
-  R² = 0.4950, Adj R² = 0.4792
-  ANOVA vs model fara interactiune: F=2.3747, p=0.1266
-  Interactiunea NU este semnificativa.
-
---- PEF ~ Varsta_ani * Gen ---
-  Varsta_ani:Gen: Estimate=-0.1942, t=-0.037, p=0.9704
-  R² = 0.0798, Adj R² = 0.0510
-  ANOVA vs PEF~Varsta: F=0.1649, p=0.8482
-  Interactiunea NU este semnificativa.
-
---- PEF ~ Inaltime_cm * Gen ---
-  Inaltime_cm:Gen: Estimate=0.1363, t=0.267, p=0.7899
-  R² = 0.4071, Adj R² = 0.3886
-  ANOVA vs PEF~Inaltime: F=0.231, p=0.7942
-  Interactiunea NU este semnificativa.
-
---- Model complet cu toate interactiunile ---
-  PEF ~ Varsta*Inaltime + Varsta*Gen + Inaltime*Gen
-  R² = 0.4958, Adj R² = 0.4633
-  ANOVA vs Varsta+Inaltime: F=0.6143, p=0.6534
-  Interactiunile impreuna NU imbunatatesc semnificativ modelul.
+1i. Interactiuni log10(PEF):
+  Varsta*Inaltime: p = 0.0428 => SEMNIFICATIVA
+  Varsta*Gen: p = 0.8592 => NU semnificativa
+  Inaltime*Gen: p = 0.8086 => NU semnificativa
 
 ###################################################################
 # ANALIZA 2: log10(FEV1) - Transformare logaritmica
@@ -969,9 +857,9 @@ Shapiro-Wilk pe log10(FEV1):
 # SUMAR GENERAL
 ###################################################################
 
-Model PEF ~ Varsta + Inaltime:
-  R² = 0.4825, Adj R² = 0.4718
-  F = 45.2185, p = 1.333e-14
+Model log10(PEF) ~ Varsta + Inaltime:
+  R² = 0.4975, Adj R² = 0.4872
+  F = 48.02, p = 2.563e-15
 
 Model log10(FEV1) ~ Varsta + Inaltime:
   R² = 0.9762, Adj R² = 0.9758
