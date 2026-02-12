@@ -389,6 +389,119 @@ cat("  Inaltime_cm (b2) =", sprintf("%.4f", coef_pef[3]),
 cat("    PEF creste cu", sprintf("%.4f", coef_pef[3]),
     "L/min, controlind pentru varsta.\n\n")
 
+# --- 1f. Modele cu interactiuni PEF ---
+cat("===========================================================================\n")
+cat("1f. MODELE CU INTERACTIUNI PENTRU PEF\n")
+cat("===========================================================================\n\n")
+
+# Interactiune Varsta * Inaltime
+cat("--- PEF ~ Varsta_ani * Inaltime_cm ---\n\n")
+model_pef_int1 <- lm(PEF ~ Varsta_ani * Inaltime_cm, data=data)
+s_pef_int1 <- summary(model_pef_int1)
+print(s_pef_int1)
+cat("\n")
+ci_pef_int1 <- confint(model_pef_int1)
+cat("95% IC:\n")
+print(ci_pef_int1)
+cat("\n")
+
+cat("Comparare cu modelul fara interactiune (ANOVA):\n")
+anova_pef_int1 <- anova(model_pef, model_pef_int1)
+print(anova_pef_int1)
+cat("\n")
+if (anova_pef_int1$`Pr(>F)`[2] < 0.05) {
+  cat("Interactiunea Varsta*Inaltime este semnificativa (p < 0.05).\n\n")
+} else {
+  cat("Interactiunea Varsta*Inaltime NU este semnificativa (p >= 0.05).\n\n")
+}
+
+# Interactiune Varsta * Gen
+cat("--- PEF ~ Varsta_ani * Gen ---\n\n")
+model_pef_int2 <- lm(PEF ~ Varsta_ani * Gen, data=data)
+s_pef_int2 <- summary(model_pef_int2)
+print(s_pef_int2)
+cat("\n")
+ci_pef_int2 <- confint(model_pef_int2)
+cat("95% IC:\n")
+print(ci_pef_int2)
+cat("\n")
+
+cat("Comparare cu modelul simplu PEF ~ Varsta (ANOVA):\n")
+anova_pef_int2 <- anova(m_pef_varsta, model_pef_int2)
+print(anova_pef_int2)
+cat("\n")
+if (anova_pef_int2$`Pr(>F)`[2] < 0.05) {
+  cat("Interactiunea Varsta*Gen este semnificativa (p < 0.05).\n\n")
+} else {
+  cat("Interactiunea Varsta*Gen NU este semnificativa (p >= 0.05).\n\n")
+}
+
+# Interactiune Inaltime * Gen
+cat("--- PEF ~ Inaltime_cm * Gen ---\n\n")
+model_pef_int3 <- lm(PEF ~ Inaltime_cm * Gen, data=data)
+s_pef_int3 <- summary(model_pef_int3)
+print(s_pef_int3)
+cat("\n")
+ci_pef_int3 <- confint(model_pef_int3)
+cat("95% IC:\n")
+print(ci_pef_int3)
+cat("\n")
+
+cat("Comparare cu modelul simplu PEF ~ Inaltime (ANOVA):\n")
+anova_pef_int3 <- anova(m_pef_inaltime, model_pef_int3)
+print(anova_pef_int3)
+cat("\n")
+if (anova_pef_int3$`Pr(>F)`[2] < 0.05) {
+  cat("Interactiunea Inaltime*Gen este semnificativa (p < 0.05).\n\n")
+} else {
+  cat("Interactiunea Inaltime*Gen NU este semnificativa (p >= 0.05).\n\n")
+}
+
+# Model complet cu toate interactiunile
+cat("--- PEF ~ Varsta_ani + Inaltime_cm + Gen + Varsta:Inaltime + Varsta:Gen + Inaltime:Gen ---\n\n")
+model_pef_full_int <- lm(PEF ~ Varsta_ani * Inaltime_cm + Varsta_ani * Gen + Inaltime_cm * Gen, data=data)
+s_pef_full_int <- summary(model_pef_full_int)
+print(s_pef_full_int)
+cat("\n")
+
+cat("Comparare model complet cu interactiuni vs model simplu Varsta+Inaltime (ANOVA):\n")
+anova_pef_full <- anova(model_pef, model_pef_full_int)
+print(anova_pef_full)
+cat("\n")
+if (anova_pef_full$`Pr(>F)`[2] < 0.05) {
+  cat("Interactiunile impreuna imbunatatesc semnificativ modelul (p < 0.05).\n\n")
+} else {
+  cat("Interactiunile impreuna NU imbunatatesc semnificativ modelul (p >= 0.05).\n\n")
+}
+
+# Interaction plot: PEF by Varsta, split by Gen
+png("pef_interaction_varsta_gen.png", width=600, height=500)
+plot(data$Varsta_ani[data$Gen==0], data$PEF[data$Gen==0],
+     pch=19, col=rgb(1,0,0,0.5), xlim=range(data$Varsta_ani), ylim=range(data$PEF),
+     xlab="Varsta (ani)", ylab="PEF (L/min)", main="PEF vs Varsta per Gen")
+points(data$Varsta_ani[data$Gen==1], data$PEF[data$Gen==1],
+       pch=17, col=rgb(0,0,1,0.5))
+abline(lm(PEF ~ Varsta_ani, data=data[data$Gen==0,]), col="red", lwd=2)
+abline(lm(PEF ~ Varsta_ani, data=data[data$Gen==1,]), col="blue", lwd=2)
+legend("topleft", legend=c("Feminin", "Masculin"), col=c("red","blue"),
+       pch=c(19,17), lty=1, lwd=2, bty="n")
+dev.off()
+cat("Salvat: pef_interaction_varsta_gen.png\n")
+
+# Interaction plot: PEF by Inaltime, split by Gen
+png("pef_interaction_inaltime_gen.png", width=600, height=500)
+plot(data$Inaltime_cm[data$Gen==0], data$PEF[data$Gen==0],
+     pch=19, col=rgb(1,0,0,0.5), xlim=range(data$Inaltime_cm), ylim=range(data$PEF),
+     xlab="Inaltime (cm)", ylab="PEF (L/min)", main="PEF vs Inaltime per Gen")
+points(data$Inaltime_cm[data$Gen==1], data$PEF[data$Gen==1],
+       pch=17, col=rgb(0,0,1,0.5))
+abline(lm(PEF ~ Inaltime_cm, data=data[data$Gen==0,]), col="red", lwd=2)
+abline(lm(PEF ~ Inaltime_cm, data=data[data$Gen==1,]), col="blue", lwd=2)
+legend("topleft", legend=c("Feminin", "Masculin"), col=c("red","blue"),
+       pch=c(19,17), lty=1, lwd=2, bty="n")
+dev.off()
+cat("Salvat: pef_interaction_inaltime_gen.png\n\n")
+
 # =============================================================================
 #   ANALIZA 2: FEV1
 # =============================================================================
@@ -587,6 +700,78 @@ cat("  Inaltime_cm (b2) =", sprintf("%.4f", coef_fev[3]),
     "=> La cresterea cu 1 cm a inaltimii,\n")
 cat("    FEV1 creste cu", sprintf("%.4f", coef_fev[3]),
     "L/s, controlind pentru varsta.\n\n")
+
+# --- 2f. Modele cu interactiuni FEV1 ---
+cat("===========================================================================\n")
+cat("2f. MODELE CU INTERACTIUNI PENTRU FEV1\n")
+cat("===========================================================================\n\n")
+
+cat("NOTA: FEV1 = -1 + 0.02 * Inaltime_cm (relatie determinista).\n")
+cat("Interactiunile nu vor aduce informatie suplimentara reala,\n")
+cat("dar le prezentam pentru completitudine.\n\n")
+
+# Interactiune Varsta * Inaltime
+cat("--- FEV1 ~ Varsta_ani * Inaltime_cm ---\n\n")
+model_fev_int1 <- lm(FEV1 ~ Varsta_ani * Inaltime_cm, data=data)
+s_fev_int1 <- summary(model_fev_int1)
+print(s_fev_int1)
+cat("\n")
+ci_fev_int1 <- confint(model_fev_int1)
+cat("95% IC:\n")
+print(ci_fev_int1)
+cat("\n")
+
+cat("Comparare cu modelul fara interactiune (ANOVA):\n")
+anova_fev_int1 <- anova(model_fev, model_fev_int1)
+print(anova_fev_int1)
+cat("\n")
+if (anova_fev_int1$`Pr(>F)`[2] < 0.05) {
+  cat("Interactiunea Varsta*Inaltime este semnificativa (p < 0.05).\n\n")
+} else {
+  cat("Interactiunea Varsta*Inaltime NU este semnificativa (p >= 0.05).\n\n")
+}
+
+# Interactiune Varsta * Gen
+cat("--- FEV1 ~ Varsta_ani * Gen ---\n\n")
+model_fev_int2 <- lm(FEV1 ~ Varsta_ani * Gen, data=data)
+s_fev_int2 <- summary(model_fev_int2)
+print(s_fev_int2)
+cat("\n")
+ci_fev_int2 <- confint(model_fev_int2)
+cat("95% IC:\n")
+print(ci_fev_int2)
+cat("\n")
+
+cat("Comparare cu modelul simplu FEV1 ~ Varsta (ANOVA):\n")
+anova_fev_int2 <- anova(m_fev_varsta, model_fev_int2)
+print(anova_fev_int2)
+cat("\n")
+if (anova_fev_int2$`Pr(>F)`[2] < 0.05) {
+  cat("Interactiunea Varsta*Gen este semnificativa (p < 0.05).\n\n")
+} else {
+  cat("Interactiunea Varsta*Gen NU este semnificativa (p >= 0.05).\n\n")
+}
+
+# Interactiune Inaltime * Gen
+cat("--- FEV1 ~ Inaltime_cm * Gen ---\n\n")
+model_fev_int3 <- lm(FEV1 ~ Inaltime_cm * Gen, data=data)
+s_fev_int3 <- summary(model_fev_int3)
+print(s_fev_int3)
+cat("\n")
+ci_fev_int3 <- confint(model_fev_int3)
+cat("95% IC:\n")
+print(ci_fev_int3)
+cat("\n")
+
+cat("Comparare cu modelul simplu FEV1 ~ Inaltime (ANOVA):\n")
+anova_fev_int3 <- anova(m_fev_inaltime, model_fev_int3)
+print(anova_fev_int3)
+cat("\n")
+if (anova_fev_int3$`Pr(>F)`[2] < 0.05) {
+  cat("Interactiunea Inaltime*Gen este semnificativa (p < 0.05).\n\n")
+} else {
+  cat("Interactiunea Inaltime*Gen NU este semnificativa (p >= 0.05).\n\n")
+}
 
 # =============================================================================
 # SUMAR GENERAL

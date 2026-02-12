@@ -202,6 +202,83 @@ VIF ≈ 1 pentru ambii predictori — **nu exista multicoliniaritate**. Acest lu
 3. Independenta erorilor (Durbin-Watson p = 0.15)
 4. Absenta multicoliniaritatii (VIF = 1.0)
 
+### 8. Modele cu interactiuni pentru PEF
+
+#### 8.1 PEF ~ Varsta * Inaltime
+
+Testam daca efectul varstei asupra PEF difera in functie de inaltime (si invers).
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | -452.43 | 195.21 | -2.318 | 0.0226 |
+| Varsta_ani | 39.76 | 21.09 | 1.885 | 0.0625 |
+| Inaltime_cm | 4.43 | 1.61 | 2.748 | 0.0072 |
+| Varsta:Inaltime | -0.27 | 0.17 | -1.541 | **0.1266** |
+
+- **R² = 0.4950**, R² ajustat = 0.4792
+- **ANOVA comparativa vs model fara interactiune:** F = 2.3747, p = 0.1266
+- **Concluzie:** Interactiunea Varsta * Inaltime **NU** este semnificativa (p = 0.13). Efectul varstei asupra PEF nu depinde semnificativ de inaltime.
+
+#### 8.2 PEF ~ Varsta * Gen
+
+Testam daca efectul varstei asupra PEF difera intre baieti si fete.
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | 83.65 | 32.31 | 2.589 | 0.0111 |
+| Varsta_ani | 7.28 | 3.46 | 2.105 | 0.0379 |
+| Gen | -2.96 | 48.07 | -0.062 | 0.9510 |
+| Varsta:Gen | -0.19 | 5.23 | -0.037 | **0.9704** |
+
+- **R² = 0.0798**, R² ajustat = 0.0510
+- **ANOVA comparativa vs PEF ~ Varsta:** F = 0.1649, p = 0.8482
+- **Concluzie:** Interactiunea Varsta * Gen **NU** este semnificativa (p = 0.97). Relatia dintre varsta si PEF este similara la baieti si fete.
+
+#### 8.3 PEF ~ Inaltime * Gen
+
+Testam daca efectul inaltimii asupra PEF difera intre baieti si fete.
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | -79.67 | 36.65 | -2.174 | 0.0322 |
+| Inaltime_cm | 1.91 | 0.30 | 6.332 | 7.77e-09 |
+| Gen | -20.42 | 61.36 | -0.333 | 0.7400 |
+| Inaltime:Gen | 0.14 | 0.51 | 0.267 | **0.7899** |
+
+- **R² = 0.4071**, R² ajustat = 0.3886
+- **ANOVA comparativa vs PEF ~ Inaltime:** F = 0.231, p = 0.7942
+- **Concluzie:** Interactiunea Inaltime * Gen **NU** este semnificativa (p = 0.79). Relatia dintre inaltime si PEF este similara la baieti si fete.
+
+#### 8.4 Model complet cu toate interactiunile
+
+PEF ~ Varsta + Inaltime + Gen + Varsta:Inaltime + Varsta:Gen + Inaltime:Gen
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | -450.73 | 204.84 | -2.200 | 0.0303 |
+| Varsta_ani | 39.53 | 21.68 | 1.823 | 0.0715 |
+| Inaltime_cm | 4.40 | 1.70 | 2.593 | 0.0110 |
+| Gen | 10.86 | 67.65 | 0.161 | 0.8728 |
+| Varsta:Inaltime | -0.26 | 0.18 | -1.466 | 0.1461 |
+| Varsta:Gen | -0.98 | 3.95 | -0.247 | 0.8055 |
+| Inaltime:Gen | -0.03 | 0.48 | -0.067 | 0.9470 |
+
+- **R² = 0.4958**, R² ajustat = 0.4633
+- **ANOVA comparativa vs model Varsta+Inaltime (fara interactiuni):** F = 0.6143, p = 0.6534
+- **Concluzie:** Adaugarea tuturor interactiunilor **NU** imbunatateste semnificativ modelul (p = 0.65). Modelul aditiv simplu (PEF ~ Varsta + Inaltime) este suficient.
+
+#### Sumar interactiuni PEF
+
+| Model | R² | Adj R² | ANOVA p vs model de baza |
+|-------|-----|--------|--------------------------|
+| PEF ~ Varsta + Inaltime (aditiv) | 0.4825 | 0.4718 | - |
+| + Varsta:Inaltime | 0.4950 | 0.4792 | 0.1266 |
+| + Varsta:Gen (vs PEF~Varsta) | 0.0798 | 0.0510 | 0.8482 |
+| + Inaltime:Gen (vs PEF~Inaltime) | 0.4071 | 0.3886 | 0.7942 |
+| Toate interactiunile | 0.4958 | 0.4633 | 0.6534 |
+
+**Niciuna** dintre interactiuni nu este semnificativa. Efectele varstei si inaltimii asupra PEF sunt aditive si nu depind de gen. Modelul optim ramine **PEF ~ Varsta + Inaltime** fara interactiuni.
+
 ---
 
 ## ANALIZA 2: FEV1 (Debitul Expirator Maxim in prima secunda)
@@ -270,6 +347,41 @@ Modelul confirma ca intreaga variabilitate a FEV1 este explicata de Inaltime, ia
 
 **Nota:** Diagnosticele pentru FEV1 nu sunt relevante din punct de vedere practic deoarece reziduurile sunt de ordinul 10^-16 (erori de rotunjire ale computerului, nu erori statistice reale). Testul Shapiro-Wilk esueaza pe aceste reziduuri minuscule deoarece ele reflecta precizia aritmeticii in virgula mobila, nu o adevarata abatere de la normalitate.
 
+### 15. Modele cu interactiuni pentru FEV1
+
+**Nota:** Deoarece FEV1 = -1 + 0.02 * Inaltime_cm este o relatie determinista, interactiunile cu Inaltime vor produce tot un fit perfect (R² = 1.0). Interactiunile sunt prezentate pentru completitudine.
+
+#### 15.1 FEV1 ~ Varsta * Inaltime
+
+- R² = 1.0000 (fit perfect, ca si fara interactiune)
+- Termenul de interactiune Varsta:Inaltime: coeficient ≈ 0 (p = 0.648)
+- **ANOVA comparativa:** F = 0.2098, p = 0.648
+- **Concluzie:** Interactiunea **NU** este semnificativa. FEV1 ramine complet determinat de Inaltime.
+
+#### 15.2 FEV1 ~ Varsta * Gen
+
+| Coeficient | Estimare | SE | t | p-value |
+|------------|----------|-----|---|---------|
+| Intercept | 1.4729 | 0.2173 | 6.779 | 9.8e-10 |
+| Varsta_ani | -0.0071 | 0.0233 | -0.307 | 0.759 |
+| Gen | -0.1440 | 0.3232 | -0.445 | 0.657 |
+| Varsta:Gen | 0.0132 | 0.0351 | 0.376 | **0.707** |
+
+- **R² = 0.0035**, R² ajustat = -0.0277
+- **ANOVA comparativa vs FEV1 ~ Varsta:** F = 0.1655, p = 0.8477
+- **Concluzie:** Interactiunea **NU** este semnificativa (p = 0.71). Nici varsta, nici genul, nici interactiunea lor nu explica FEV1 (deoarece FEV1 depinde exclusiv de inaltime).
+
+#### 15.3 FEV1 ~ Inaltime * Gen
+
+- R² = 1.0000 (fit perfect)
+- Termenul de interactiune Inaltime:Gen: coeficient ≈ 0 (p = 0.376)
+- **ANOVA comparativa vs FEV1 ~ Inaltime:** F = 1.1337, p = 0.3261
+- **Concluzie:** Interactiunea **NU** este semnificativa. Relatia determinista FEV1-Inaltime nu difera pe gen.
+
+#### Sumar interactiuni FEV1
+
+Niciuna dintre interactiuni nu este semnificativa. Rezultatul era previzibil: FEV1 este complet determinat de Inaltime prin formula liniara, deci nicio alta variabila sau interactiune nu poate aduce informatie suplimentara.
+
 ---
 
 ## Sumar general
@@ -288,11 +400,17 @@ Modelul confirma ca intreaga variabilitate a FEV1 este explicata de Inaltime, ia
    - Genul nu aduce informatie suplimentara semnificativa
    - Toate conditiile de validitate ale regresiei sunt indeplinite
 
-2. **Modelul FEV1** nu este valid din punct de vedere statistic deoarece FEV1 este o functie determinista a inaltimii (FEV1 = -1 + 0.02 * Inaltime_cm). Aceasta relatie perfecta (R² = 1.0) indica faptul ca FEV1 a fost probabil calculat din inaltime in setul de date, nu masurat independent prin spirometrie.
+2. **Interactiunile** nu sunt semnificative pentru niciunul dintre modele:
+   - Varsta * Inaltime: p = 0.13 (pentru PEF); p = 0.65 (pentru FEV1)
+   - Varsta * Gen: p = 0.97 (pentru PEF); p = 0.71 (pentru FEV1)
+   - Inaltime * Gen: p = 0.79 (pentru PEF); p = 0.33 (pentru FEV1)
+   - Efectele variabilelor sunt aditive — relatia predictorilor cu variabilele spirometrice nu difera in functie de gen sau de nivelul celorlalti predictori
 
-3. **Genul** nu este un predictor semnificativ pentru niciunul dintre parametrii spirometrici, nici individual, nici in combinatie cu celelalte variabile.
+3. **Modelul FEV1** nu este valid din punct de vedere statistic deoarece FEV1 este o functie determinista a inaltimii (FEV1 = -1 + 0.02 * Inaltime_cm). Aceasta relatie perfecta (R² = 1.0) indica faptul ca FEV1 a fost probabil calculat din inaltime in setul de date, nu masurat independent prin spirometrie.
 
-4. **Varsta si Inaltimea** sunt aproape complet necorelate in acest esantion (r = -0.005), ceea ce le face predictori ortogonali ideali in modelul multiplu — fiecare aduce informatie independenta.
+4. **Genul** nu este un predictor semnificativ pentru niciunul dintre parametrii spirometrici, nici individual, nici in combinatie cu celelalte variabile, nici prin interactiuni.
+
+5. **Varsta si Inaltimea** sunt aproape complet necorelate in acest esantion (r = -0.005), ceea ce le face predictori ortogonali ideali in modelul multiplu — fiecare aduce informatie independenta.
 
 ---
 
@@ -308,6 +426,8 @@ Modelul confirma ca intreaga variabilitate a FEV1 este explicata de Inaltime, ia
 | `pef_hist_resid.png` | Histograma reziduurilor modelului PEF |
 | `fev1_diagnostic.png` | Grafice diagnostice (4 panouri) pentru modelul FEV1 |
 | `fev1_hist_resid.png` | Histograma reziduurilor modelului FEV1 |
+| `pef_interaction_varsta_gen.png` | PEF vs Varsta, separat pe gen (grafic interactiune) |
+| `pef_interaction_inaltime_gen.png` | PEF vs Inaltime, separat pe gen (grafic interactiune) |
 
 ---
 
@@ -570,6 +690,34 @@ VIF:
    1.000021    1.000021
   Toate VIF < 5: nu exista probleme de multicoliniaritate.
 
+===========================================================================
+1f. MODELE CU INTERACTIUNI PENTRU PEF
+===========================================================================
+
+--- PEF ~ Varsta_ani * Inaltime_cm ---
+  Varsta_ani:Inaltime_cm: Estimate=-0.2686, t=-1.541, p=0.1266
+  R² = 0.4950, Adj R² = 0.4792
+  ANOVA vs model fara interactiune: F=2.3747, p=0.1266
+  Interactiunea NU este semnificativa.
+
+--- PEF ~ Varsta_ani * Gen ---
+  Varsta_ani:Gen: Estimate=-0.1942, t=-0.037, p=0.9704
+  R² = 0.0798, Adj R² = 0.0510
+  ANOVA vs PEF~Varsta: F=0.1649, p=0.8482
+  Interactiunea NU este semnificativa.
+
+--- PEF ~ Inaltime_cm * Gen ---
+  Inaltime_cm:Gen: Estimate=0.1363, t=0.267, p=0.7899
+  R² = 0.4071, Adj R² = 0.3886
+  ANOVA vs PEF~Inaltime: F=0.231, p=0.7942
+  Interactiunea NU este semnificativa.
+
+--- Model complet cu toate interactiunile ---
+  PEF ~ Varsta*Inaltime + Varsta*Gen + Inaltime*Gen
+  R² = 0.4958, Adj R² = 0.4633
+  ANOVA vs Varsta+Inaltime: F=0.6143, p=0.6534
+  Interactiunile impreuna NU imbunatatesc semnificativ modelul.
+
 ###################################################################
 # ANALIZA 2: FEV1
 ###################################################################
@@ -597,6 +745,25 @@ Diagnostice FEV1:
   Shapiro-Wilk: W = 0.9418, p = 0.0002 (reziduuri nenormale - artefact al fitului perfect)
   Breusch-Pagan: BP = 1.4966, p = 0.4732
   Durbin-Watson: DW = 2.4326, p = 0.9852
+
+===========================================================================
+2f. MODELE CU INTERACTIUNI PENTRU FEV1
+===========================================================================
+
+--- FEV1 ~ Varsta_ani * Inaltime_cm ---
+  R² = 1.0000 (fit perfect)
+  Varsta:Inaltime: p = 0.648
+  ANOVA: F=0.2098, p=0.648 => NU semnificativ
+
+--- FEV1 ~ Varsta_ani * Gen ---
+  R² = 0.0035, Adj R² = -0.0277
+  Varsta:Gen: p = 0.707
+  ANOVA vs FEV1~Varsta: F=0.1655, p=0.8477 => NU semnificativ
+
+--- FEV1 ~ Inaltime_cm * Gen ---
+  R² = 1.0000 (fit perfect)
+  Inaltime:Gen: p = 0.376
+  ANOVA vs FEV1~Inaltime: F=1.1337, p=0.3261 => NU semnificativ
 
 ###################################################################
 # SUMAR GENERAL
