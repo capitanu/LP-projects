@@ -9,7 +9,7 @@
 
 ### Statistical analyses
 
-Analiza statistică a fost realizată utilizând limbajul R (versiunea 4.5.2). Variabilele cantitative au fost testate pentru normalitate și, fiind non-normal distribuite, au fost prezentate ca mediană și interval intercuartilic (IQR). Variabilele categoriale au fost prezentate ca frecvențe absolute și relative (%). Comparațiile între grupuri au fost efectuate utilizând testul Mann-Whitney U (Wilcoxon rank-sum) pentru variabilele cantitative și testul Chi-pătrat pentru variabilele categoriale. Capacitatea discriminativă a variabilelor a fost evaluată prin analiza curbelor ROC (Receiver Operating Characteristic), cu determinarea AUC (Area Under the Curve) și a intervalelor de încredere de 95%. Punctul optim de clasificare (cut-off) a fost determinat prin metoda Youden. Regresiile logistice univariate au fost utilizate pentru estimarea odds ratio (OR) neajustat. Modelul de regresie logistică multivariată a fost construit cu variabila de interes LDL (dichotomizată la mediană) și ajustat pentru variabile selectate pe baza relevanței clinice (vârstă, istoric familial de boală cardiacă, hipertensiune, diabet, obezitate, tensiune arterială sistolică, HDL, trigliceride), respectând limita de grade de libertate disponibile (min(110, 890)/10 ≈ 11). Condițiile de aplicare au fost verificate prin testul Hosmer-Lemeshow (goodness-of-fit), VIF (multicolinearitate), testul Box-Tidwell (liniaritate în logit) și distanța Cook (observații influente). Pragul de semnificație statistică a fost stabilit la p < 0.05.
+Analiza statistică a fost realizată utilizând limbajul R (versiunea 4.5.2). Variabilele cantitative au fost testate pentru normalitate și, fiind non-normal distribuite, au fost prezentate ca mediană și interval intercuartilic (IQR). Variabilele categoriale au fost prezentate ca frecvențe absolute și relative (%). Comparațiile între grupuri au fost efectuate utilizând testul Mann-Whitney U pentru variabilele cantitative și testul Chi-pătrat pentru variabilele categoriale. Capacitatea discriminativă a variabilelor a fost evaluată prin analiza curbelor ROC (Receiver Operating Characteristic), cu determinarea AUC (Area Under the Curve) și a intervalelor de încredere de 95%. Punctul optim de clasificare (cut-off) a fost determinat prin metoda Youden. Regresiile logistice univariate au fost utilizate pentru estimarea odds ratio (OR) neajustat. Modelul de regresie logistică multivariată a fost construit pornind de la un model inițial cu 9 predictori selectați pe baza relevanței clinice (variabila de interes: LDL dichotomizat la mediană; variabile de ajustare: age, family_history, hypertension, diabetes, obesity, systolic_bp, HDL, triglycerides), respectând limita de grade de libertate disponibile (min(110, 890)/10 ≈ 11). Selecția finală a variabilelor a fost realizată prin eliminare progresivă (backward elimination) pe baza criteriului AIC (Akaike Information Criterion). Interacțiunea LDL × family_history a fost testată pentru evaluarea unei posibile predispoziții genetice. Condițiile de aplicare au fost verificate prin testul Hosmer-Lemeshow (goodness-of-fit), VIF (multicolinearitate), testul Box-Tidwell (liniaritate în logit) și distanța Cook (observații influente). Comparația capacității discriminative între modele a fost realizată prin testul DeLong. Pragul de semnificație statistică a fost stabilit la p < 0.05.
 
 ---
 
@@ -95,79 +95,72 @@ OR, odds ratio; CI, confidence interval
 | **Model 2 - PLR**                    |               |                 |        |
 | &emsp;LDL (as quantitative variable) | 1.035         | (1.027 - 1.043) | <0.001 |
 
-**Interpretare:** În analiza univariată, variabilele semnificativ asociate cu boala cardiacă au fost: istoricul familial de boală cardiacă (OR = 2.16, p < 0.001), colesterolul LDL (OR = 1.035 per mg/dL, p < 0.001), fumatul (OR = 2.23, p < 0.001), stresul crescut (OR = 1.67, p = 0.012), HDL (OR = 1.03, p < 0.001). LDL dichotomizat la mediană (≥ 129.2 mg/dL) a fost puternic asociat cu boala cardiacă (OR = 4.92, p < 0.001), indicând că pacienții cu LDL peste mediană au de aproape 5 ori mai mari șansele de a avea boală cardiacă. Feritina nu a fost asociată semnificativ cu boala cardiacă (OR = 1.000, p = 0.991).
+**Interpretare:** În analiza univariată, variabilele semnificativ asociate cu boala cardiacă au fost: colesterolul LDL (OR = 1.035 per mg/dL, p < 0.001), fumatul (OR = 2.23, p < 0.001), istoricul familial de boală cardiacă (OR = 2.16, p < 0.001), stresul crescut (OR = 1.67, p = 0.012), HDL (OR = 1.03, p < 0.001), BMI (OR = 0.95, p < 0.001), glucoza (OR = 0.985, p < 0.001), HbA1c (OR = 0.915, p < 0.001), trigliceridele (OR = 0.993, p < 0.001) și circumferința taliei (OR = 0.983, p < 0.001). LDL dichotomizat la mediană (≥ 129.2 mg/dL) a fost puternic asociat cu boala cardiacă (OR = 4.92, p < 0.001), indicând că pacienții cu LDL peste mediană au de aproape 5 ori mai mari șansele de a avea boală cardiacă. Feritina nu a fost asociată semnificativ cu boala cardiacă (OR = 1.000, p = 0.991).
 
 ---
 
-### Table 4. Multivariate logistic regression predicting heart disease based on LDL cholesterol and adjusted for 8 variables.
+### Table 4. Multivariate logistic regression predicting heart disease based on LDL cholesterol and adjusted for 4 variables (backward elimination).
 
-**Strategia de selecție a variabilelor:**
+**Strategia de construcție a modelului:**
 
-Modelul de regresie logistică multivariată a fost construit respectând limita de grade de libertate disponibile: min(110, 890) / 10 ≈ 11 grade de libertate. Variabilele de ajustare au fost selectate pe baza relevanței clinice și fiziopatologice pentru bolile cardiovasculare:
+Modelul inițial a inclus 9 predictori (9 g.d.l. < 11 permise: min(110, 890)/10 ≈ 11) selectați pe baza relevanței clinice pentru bolile cardiovasculare: LDL ≥ mediană (variabila de interes), age, family_history, hypertension, diabetes, obesity, systolic_bp, HDL, triglycerides (AIC inițial = 614.4).
 
-- **LDL >= median** (variabila de interes, dichotomială) - 1 g.d.l.
-- **age** (factor de risc major cardiovascular) - 1 g.d.l.
-- **family_history** (istoric familial de boală cardiacă) - 1 g.d.l.
-- **hypertension** (comorbiditate majoră CV) - 1 g.d.l.
-- **diabetes** (comorbiditate metabolică) - 1 g.d.l.
-- **obesity** (factor de risc metabolic) - 1 g.d.l.
-- **systolic_bp** (indicator clinic) - 1 g.d.l.
-- **hdl** (factor protector CV) - 1 g.d.l.
-- **triglycerides** (marker metabolic) - 1 g.d.l.
-- **Total: 9 g.d.l. (< 11 permise)**
+Selecția finală a fost realizată prin **backward elimination pe baza criteriului AIC**. Au fost eliminate succesiv variabilele care nu contribuiau semnificativ la modelul global:
 
-| Variable       | OR adjusted | 95% CI           | p      |
-|----------------|-------------|------------------|--------|
-| LDL >= median  | 5.725       | (3.497 - 9.791)  | <0.001 |
-| age            | 1.003       | (0.996 - 1.009)  | 0.364  |
-| family_history | 2.295       | (1.469 - 3.565)  | <0.001 |
-| hypertension   | 1.321       | (0.861 - 2.020)  | 0.200  |
-| diabetes       | 1.468       | (0.860 - 2.435)  | 0.147  |
-| obesity        | 1.409       | (0.896 - 2.191)  | 0.132  |
-| systolic_bp    | 1.004       | (0.994 - 1.013)  | 0.462  |
-| hdl            | 1.024       | (1.008 - 1.041)  | 0.004  |
-| triglycerides  | 0.997       | (0.992 - 1.001)  | 0.162  |
+1. systolic_bp (AIC: 614.4 → 613.0)
+2. age (AIC: 613.0 → 611.8)
+3. hypertension (AIC: 611.8 → 611.4)
+4. triglycerides (AIC: 611.4 → 611.2)
+
+Testul raportului de verosimilitate (LRT) a confirmat că modelul redus nu pierde informație semnificativă față de modelul complet cu 9 predictori (Chi² = 4.79, df = 4, p = 0.310).
+
+**Modelul final (5 predictori, AIC = 611.2):**
+
+| Variable       | OR adjusted | 95% CI          | p      |
+|----------------|-------------|-----------------|--------|
+| LDL >= median  | 5.619       | (3.437 - 9.593) | <0.001 |
+| family_history | 2.298       | (1.474 - 3.564) | <0.001 |
+| diabetes       | 1.465       | (0.859 - 2.434) | 0.148  |
+| obesity        | 1.406       | (0.897 - 2.183) | 0.132  |
+| HDL            | 1.032       | (1.019 - 1.045) | <0.001 |
+
+Diabetes și obesity au fost reținute de procedura de backward elimination deoarece eliminarea lor ar crește AIC-ul modelului, chiar dacă nu ating individual pragul de semnificație statistică — contribuie marginal la performanța globală a modelului.
+
+**Testarea interacțiunii LDL × family_history:**
+
+A fost testat dacă istoricul familial de boală cardiacă amplifică efectul LDL (predispoziție genetică). Interacțiunea nu este semnificativă (OR = 0.477, 95% CI: 0.166 - 1.33, p = 0.161; LRT p = 0.159; AIC cu interacțiune = 611.2 vs. fără = 611.2). Nu există dovezi ale unei predispoziții genetice care să amplifice efectul LDL asupra bolii cardiace; cele două variabile acționează independent și aditiv pe scala log-odds.
 
 **Verificarea condițiilor de aplicare:**
 
-1. **Hosmer-Lemeshow test:** Chi-squared = 8.89, df = 8, p = 0.352. Modelul se potrivește bine pe date (p > 0.05).
-2. **Multicolinearitate (VIF):** Toate valorile VIF < 2 (max = 1.65 pentru HDL). Nu există multicolinearitate.
-3. **Liniaritate în logit (Box-Tidwell):** Toate variabilele continue respectă condiția de liniaritate (p > 0.05), cu excepția trigliceridelor care prezintă o ușoară non-liniaritate marginală (p = 0.04).
-4. **Observații influente (Cook's Distance):** 92 observații cu Cook's D > 4/n, dar niciuna cu valori extreme care ar necesita excludere.
-5. **Capacitatea discriminativă:** AUC = 0.764 (95% CI: 0.719 - 0.810) - discriminare acceptabilă.
-6. **Pseudo R² Nagelkerke:** 0.188
+1. **Hosmer-Lemeshow test:** Chi² = 5.67, df = 8, p = 0.684. Modelul se potrivește bine pe date (p > 0.05).
+2. **Multicolinearitate (VIF):** Toate valorile VIF < 1.03. Nu există multicolinearitate.
+3. **Liniaritate în logit (Box-Tidwell):** HDL, singura variabilă continuă din modelul final, respectă condiția de liniaritate (p = 0.961).
+4. **Observații influente (Cook's Distance):** 77 observații cu Cook's D > 4/n, dar niciuna cu valori extreme care ar necesita excludere.
+5. **Capacitatea discriminativă:** AUC = 0.760 (95% CI: 0.715 - 0.805) — discriminare acceptabilă. Testul DeLong confirmă că nu există diferență semnificativă față de modelul complet cu 9 predictori (AUC = 0.764, p = 0.460), validând reducerea modelului.
+6. **Pseudo R² Nagelkerke:** 0.179.
 
-**Interpretare Table 4:** În modelul multivariat, LDL ≥ mediană rămâne cel mai puternic predictor independent al bolii cardiace (OR ajustat = 5.73, 95% CI: 3.50 - 9.79, p < 0.001), ceea ce înseamnă că pacienții cu LDL peste mediană au de aproape 6 ori mai mari șansele de a prezenta boală cardiacă, independent de ceilalți factori din model. Istoricul familial de boală cardiacă este al doilea predictor semnificativ (OR = 2.30, 95% CI: 1.47 - 3.57, p < 0.001), iar HDL colesterol este de asemenea semnificativ asociat (OR = 1.02 per mg/dL, p = 0.004). Celelalte variabile (vârsta, hipertensiunea, diabetul, obezitatea, tensiunea sistolică, trigliceridele) nu au atins pragul de semnificație statistică în modelul multivariat.
+**Interpretare:** În modelul multivariat final, obținut prin backward elimination, LDL ≥ mediană rămâne cel mai puternic predictor independent al bolii cardiace (OR ajustat = 5.62, 95% CI: 3.44 - 9.59, p < 0.001), ceea ce înseamnă că pacienții cu LDL peste mediană au de aproape 6 ori mai mari șansele de a prezenta boală cardiacă, independent de ceilalți factori din model. Istoricul familial de boală cardiacă este al doilea predictor semnificativ (OR = 2.30, 95% CI: 1.47 - 3.56, p < 0.001), iar HDL colesterol este de asemenea semnificativ asociat (OR = 1.03 per mg/dL, 95% CI: 1.02 - 1.05, p < 0.001). Modelul cu 5 predictori este preferat celui cu 9 deoarece obține aceeași capacitate discriminativă (AUC 0.760 vs. 0.764, DeLong p = 0.460) cu o complexitate semnificativ mai redusă (AIC 611.2 vs. 614.4).
 
 ---
 
 ## Concluzie
 
-Colesterolul LDL reprezintă un predictor semnificativ și puternic al bolii cardiace, atât în analiza univariată (OR = 4.92 pentru LDL ≥ mediană), cât și în modelul multivariat ajustat (OR = 5.73). Capacitatea sa discriminativă, evaluată prin curba ROC, este acceptabilă (AUC = 0.737), cu un cut-off optim de 138.9 mg/dL. În contrast, feritina nu prezintă nicio asociere semnificativă cu boala cardiacă (AUC = 0.516, OR = 1.00, p = 0.991), demonstrând lipsa capacității discriminative. Modelul multivariat, care include LDL dichotomizat, istoricul familial de boală cardiacă și HDL ca predictori semnificativi, prezintă o capacitate discriminativă acceptabilă (AUC = 0.764) și se potrivește bine pe date (Hosmer-Lemeshow p = 0.352), cu absența multicolinearității (VIF < 2) și liniaritate în logit confirmată pentru variabilele continue.
+Colesterolul LDL reprezintă un predictor puternic și independent al bolii cardiace. În modelul multivariat final, obținut prin backward elimination din 9 predictori inițiali, pacienții cu LDL ≥ mediană (129.2 mg/dL) au șanse de 5.6 ori mai mari de a prezenta boală cardiacă (OR = 5.62, 95% CI: 3.44 - 9.59, p < 0.001). Istoricul familial (OR = 2.30, p < 0.001) și HDL-ul (OR = 1.03/mg/dL, p < 0.001) sunt de asemenea predictori independenți semnificativi. Interacțiunea LDL × family_history nu este semnificativă (p = 0.161), indicând că efectul LDL nu este amplificat de predispoziția genetică — cele două variabile acționează independent. Capacitatea discriminativă a LDL individual, evaluată prin curba ROC, este acceptabilă (AUC = 0.737), cu un cut-off optim de 138.9 mg/dL. În contrast, feritina nu prezintă nicio asociere cu boala cardiacă (AUC = 0.516, OR = 1.00, p = 0.991). Modelul final, cu doar 5 predictori, are o capacitate discriminativă comparabilă cu modelul complet de 9 predictori (AUC 0.760 vs. 0.764, DeLong p = 0.460), se potrivește bine pe date (Hosmer-Lemeshow p = 0.684) și nu prezintă multicolinearitate (VIF < 1.03), demonstrând că un model mai parsimonios este preferabil.
 
 ---
 
 ## Cod R utilizat și rezultate brute
 
 ```r
-# =============================================================================
-# Practica de specialitate - Analiza statistică a datelor cardiovasculare
-# Variabila 1 = LDL (ldl_cholesterol)
-# Variabila 2 = ferritin
-# =============================================================================
-
-# --- Încărcare pachete ---
 library(dplyr)
 library(pROC)
 library(ggplot2)
-library(ResourceSelection)  # Hosmer-Lemeshow test
-library(car)                # VIF
-library(broom)              # tidy model outputs
+library(ResourceSelection)
+library(car)
+library(broom)
 
-# --- Citire date ---
 data <- read.csv("cardiovascular_data.csv", stringsAsFactors = FALSE)
 
-# Conversii tipuri de date
 data$heart_disease <- as.factor(data$heart_disease)
 data$smoking_status <- as.factor(data$smoking_status)
 data$family_history <- as.factor(data$family_history)
@@ -182,144 +175,176 @@ data$cancer_history <- as.factor(data$cancer_history)
 data$liver_disease <- as.factor(data$liver_disease)
 data$mental_health_issue <- as.factor(data$mental_health_issue)
 
-# Subgrupuri
 with_hd <- data %>% filter(heart_disease == "1")
 without_hd <- data %>% filter(heart_disease == "0")
 
-# =============================================================================
 # TABLE 1: Participant Characteristics
-# =============================================================================
-
-# Funcție helper pentru median (IQR)
 median_iqr <- function(x) {
-  m <- median(x, na.rm = TRUE)
-  q1 <- quantile(x, 0.25, na.rm = TRUE)
-  q3 <- quantile(x, 0.75, na.rm = TRUE)
-  sprintf("%.1f (%.1f - %.1f)", m, q1, q3)
+  sprintf("%.1f (%.1f - %.1f)", median(x, na.rm = TRUE),
+          quantile(x, 0.25, na.rm = TRUE), quantile(x, 0.75, na.rm = TRUE))
 }
 
-# Funcție helper pentru n (%)
 n_pct <- function(x, level = "1") {
   n <- sum(x == level, na.rm = TRUE)
-  pct <- n / length(x) * 100
-  sprintf("%d (%.1f%%)", n, pct)
+  sprintf("%d (%.1f%%)", n, n / length(x) * 100)
 }
 
-# Age
-wilcox.test(age ~ heart_disease, data = data)
+age_test <- wilcox.test(age ~ heart_disease, data = data)
+fh_test <- chisq.test(table(data$heart_disease, data$family_history))
+ht_test <- chisq.test(table(data$heart_disease, data$hypertension))
+diab_test <- chisq.test(table(data$heart_disease, data$diabetes))
+ob_test <- chisq.test(table(data$heart_disease, data$obesity))
+ldl_test <- wilcox.test(ldl_cholesterol ~ heart_disease, data = data)
+fer_test <- wilcox.test(ferritin ~ heart_disease, data = data)
 
-# Family History
-chisq.test(table(data$heart_disease, data$family_history))
-
-# Comorbidities
-chisq.test(table(data$heart_disease, data$hypertension))
-chisq.test(table(data$heart_disease, data$diabetes))
-chisq.test(table(data$heart_disease, data$obesity))
-
-# Laboratory data
-wilcox.test(ldl_cholesterol ~ heart_disease, data = data)
-wilcox.test(ferritin ~ heart_disease, data = data)
-
-# =============================================================================
-# TABLE 2 & FIGURES: ROC Analysis
-# =============================================================================
-
+# TABLE 2: ROC Analysis
 hd_numeric <- as.numeric(as.character(data$heart_disease))
 
-# ROC for LDL
 roc_ldl <- roc(hd_numeric, data$ldl_cholesterol, quiet = TRUE)
-auc(roc_ldl)
-ci.auc(roc_ldl)
-coords(roc_ldl, "best", best.method = "youden",
-       ret = c("threshold", "sensitivity", "specificity"))
+auc_ldl <- auc(roc_ldl)
+ci_ldl <- ci.auc(roc_ldl)
+coords_ldl <- coords(roc_ldl, "best", best.method = "youden",
+                     ret = c("threshold", "sensitivity", "specificity"))
 
-# ROC for Ferritin
 roc_fer <- roc(hd_numeric, data$ferritin, quiet = TRUE)
-auc(roc_fer)
-ci.auc(roc_fer)
-coords(roc_fer, "best", best.method = "youden",
-       ret = c("threshold", "sensitivity", "specificity"))
+auc_fer <- auc(roc_fer)
+ci_fer <- ci.auc(roc_fer)
+coords_fer <- coords(roc_fer, "best", best.method = "youden",
+                     ret = c("threshold", "sensitivity", "specificity"))
 
-# Figures
 png("figure1_roc_ldl.png", width = 800, height = 700, res = 150)
-plot(roc_ldl, main = "ROC Curve - LDL Cholesterol",
-     col = "blue", lwd = 2, print.auc = TRUE,
+plot(roc_ldl, main = "ROC Curve - LDL Cholesterol", col = "blue", lwd = 2,
+     print.auc = TRUE, print.auc.x = 0.4, print.auc.y = 0.2,
      print.thres = TRUE, print.thres.best.method = "youden",
-     legacy.axes = TRUE)
+     legacy.axes = TRUE, xlab = "1 - Specificity", ylab = "Sensitivity")
+legend("bottomright",
+       legend = paste0("AUC = ", sprintf("%.3f", auc_ldl),
+                       " (", sprintf("%.3f", ci_ldl[1]), "-", sprintf("%.3f", ci_ldl[3]), ")"),
+       col = "blue", lwd = 2, bty = "n")
 dev.off()
 
 png("figure2_roc_ferritin.png", width = 800, height = 700, res = 150)
-plot(roc_fer, main = "ROC Curve - Ferritin",
-     col = "red", lwd = 2, print.auc = TRUE,
+plot(roc_fer, main = "ROC Curve - Ferritin", col = "red", lwd = 2,
+     print.auc = TRUE, print.auc.x = 0.4, print.auc.y = 0.2,
      print.thres = TRUE, print.thres.best.method = "youden",
-     legacy.axes = TRUE)
+     legacy.axes = TRUE, xlab = "1 - Specificity", ylab = "Sensitivity")
+legend("bottomright",
+       legend = paste0("AUC = ", sprintf("%.3f", auc_fer),
+                       " (", sprintf("%.3f", ci_fer[1]), "-", sprintf("%.3f", ci_fer[3]), ")"),
+       col = "red", lwd = 2, bty = "n")
 dev.off()
 
-# =============================================================================
 # TABLE 3: Univariate Logistic Regressions
-# =============================================================================
-
 univar_vars <- c("age", "smoking_status", "ldl_cholesterol", "ferritin",
                  "family_history", "high_stress", "hypertension", "diabetes",
                  "obesity", "systolic_bp", "diastolic_bp", "bmi",
                  "glucose", "hba1c", "triglycerides", "hdl",
                  "total_cholesterol", "waist_circumference", "resting_heart_rate")
 
+univar_results <- data.frame()
 for (var in univar_vars) {
-  formula <- as.formula(paste("heart_disease ~", var))
-  model <- glm(formula, data = data, family = binomial)
-  print(tidy(model, conf.int = TRUE, exponentiate = TRUE))
+  model <- glm(as.formula(paste("heart_disease ~", var)), data = data, family = binomial)
+  tidied <- tidy(model, conf.int = TRUE, exponentiate = TRUE)
+  coef_row <- tidied[nrow(tidied), ]
+  univar_results <- rbind(univar_results, data.frame(
+    Variable = var, OR = coef_row$estimate,
+    CI_low = coef_row$conf.low, CI_high = coef_row$conf.high, p = coef_row$p.value
+  ))
 }
+print(univar_results)
 
-# Model 1: LDL >= median
+# Model 1: LDL >= median (dichotomizat)
 ldl_median <- median(data$ldl_cholesterol, na.rm = TRUE)
 data$ldl_high <- as.factor(ifelse(data$ldl_cholesterol >= ldl_median, 1, 0))
+
 model1 <- glm(heart_disease ~ ldl_high, data = data, family = binomial)
-tidy(model1, conf.int = TRUE, exponentiate = TRUE)
+tidied1 <- tidy(model1, conf.int = TRUE, exponentiate = TRUE)
+print(tidied1)
 
-# Model 2: LDL quantitative
+# Model 2: LDL as quantitative
 model2 <- glm(heart_disease ~ ldl_cholesterol, data = data, family = binomial)
-tidy(model2, conf.int = TRUE, exponentiate = TRUE)
+tidied2 <- tidy(model2, conf.int = TRUE, exponentiate = TRUE)
+print(tidied2)
 
-# =============================================================================
-# TABLE 4: Multivariate Logistic Regression
-# =============================================================================
+# TABLE 4: Multivariate - Backward Elimination
+# Full model (9 predictors, 9 df < 11 permitted: min(110,890)/10)
+full_model <- glm(heart_disease ~ ldl_high + age + family_history +
+                    hypertension + diabetes + obesity +
+                    systolic_bp + hdl + triglycerides,
+                  data = data, family = binomial)
 
-multi_model <- glm(heart_disease ~ ldl_high + age + family_history +
-                     hypertension + diabetes + obesity +
-                     systolic_bp + hdl + triglycerides,
-                   data = data, family = binomial)
+multi_model <- step(full_model, direction = "backward", trace = 1)
 summary(multi_model)
-tidy(multi_model, conf.int = TRUE, exponentiate = TRUE)
+tidied_multi <- tidy(multi_model, conf.int = TRUE, exponentiate = TRUE)
+print(tidied_multi)
 
-# Verificare condiții
+# LRT: full vs reduced
+anova(multi_model, full_model, test = "Chisq")
+
+# Interaction LDL x family_history
+interaction_model <- glm(
+  update(formula(multi_model), ~ . + ldl_high:family_history),
+  data = data, family = binomial
+)
+summary(interaction_model)
+tidy(interaction_model, conf.int = TRUE, exponentiate = TRUE)
+anova(multi_model, interaction_model, test = "Chisq")
+
+# Model diagnostics
 hoslem.test(as.numeric(as.character(data$heart_disease)),
             fitted(multi_model), g = 10)
 vif(multi_model)
 
-# Box-Tidwell
-data$age_log <- data$age * log(data$age)
-data$systolic_bp_log <- data$systolic_bp * log(data$systolic_bp)
-data$hdl_log <- data$hdl * log(data$hdl)
-data$triglycerides_log <- data$triglycerides * log(data$triglycerides)
+# Box-Tidwell (HDL = only continuous predictor in final model)
+data_bt <- data
+data_bt$hdl_log <- data_bt$hdl * log(data_bt$hdl)
+bt_model <- glm(update(formula(multi_model), ~ . + hdl_log),
+                data = data_bt, family = binomial)
+tidy(bt_model)[tidy(bt_model)$term == "hdl_log", ]
 
-bt_model <- glm(heart_disease ~ ldl_high + age + family_history +
-                  hypertension + diabetes + obesity +
-                  systolic_bp + hdl + triglycerides +
-                  age_log + systolic_bp_log + hdl_log + triglycerides_log,
-                data = data, family = binomial)
-tidy(bt_model)
-
-# Cook's Distance
+# Cook's distance
 cooks_d <- cooks.distance(multi_model)
-sum(cooks_d > 4/nrow(data))
+sum(cooks_d > 4 / nrow(data))
 
-# AUC model
+# AUC
 pred_probs <- predict(multi_model, type = "response")
-roc_model <- roc(as.numeric(as.character(data$heart_disease)),
-                 pred_probs, quiet = TRUE)
+roc_model <- roc(as.numeric(as.character(data$heart_disease)), pred_probs, quiet = TRUE)
 auc(roc_model)
 ci.auc(roc_model)
+
+# DeLong test vs full model
+roc_full <- roc(as.numeric(as.character(data$heart_disease)),
+                predict(full_model, type = "response"), quiet = TRUE)
+roc.test(roc_model, roc_full, method = "delong")
+
+# Classification table
+pred_class <- ifelse(pred_probs >= 0.5, 1, 0)
+conf_matrix <- table(Observed = as.numeric(as.character(data$heart_disease)),
+                     Predicted = pred_class)
+conf_matrix
+sum(diag(conf_matrix)) / sum(conf_matrix)
+
+# Nagelkerke R²
+null_model <- glm(heart_disease ~ 1, data = data, family = binomial)
+ll_null <- as.numeric(logLik(null_model))
+ll_model <- as.numeric(logLik(multi_model))
+n <- nrow(data)
+cox_snell <- 1 - exp((2/n) * (ll_null - ll_model))
+nagelkerke <- cox_snell / (1 - exp((2/n) * ll_null))
+
+# Diagnostic plots
+png("diagnostic_cooks.png", width = 800, height = 600, res = 150)
+plot(cooks_d, main = "Cook's Distance - Final Model",
+     ylab = "Cook's Distance", xlab = "Observation")
+abline(h = 4/nrow(data), col = "red", lty = 2)
+dev.off()
+
+png("roc_model_multivar.png", width = 800, height = 700, res = 150)
+plot(roc_model, main = "ROC Curve - Final Multivariate Model",
+     col = "darkgreen", lwd = 2,
+     print.auc = TRUE, print.auc.x = 0.4, print.auc.y = 0.2,
+     legacy.axes = TRUE, xlab = "1 - Specificity", ylab = "Sensitivity")
+dev.off()
 ```
 
 ### Rezultate brute R (needitate)
@@ -366,31 +391,45 @@ resting_heart_rate       0.995   (0.980 - 1.010)   0.486
 Model 1 - LDL >= median: OR=4.917 (3.061-8.251), p=2.49e-10
 Model 2 - PLR (LDL cantitativ): OR=1.035 (1.027-1.043), p=<2e-16
 
-TABLE 4 (Multivariate):
-Call:
-glm(formula = heart_disease ~ ldl_high + age + family_history +
-    hypertension + diabetes + obesity + systolic_bp + hdl + triglycerides,
-    family = binomial, data = data)
+TABLE 4 (Backward Elimination):
+Start:  AIC=614.44
+heart_disease ~ ldl_high + age + family_history + hypertension +
+    diabetes + obesity + systolic_bp + hdl + triglycerides
+
+Step 1: - systolic_bp   AIC=612.98
+Step 2: - age           AIC=611.77
+Step 3: - hypertension  AIC=611.40
+Step 4: - triglycerides AIC=611.23
+
+Final model:
+glm(formula = heart_disease ~ ldl_high + family_history + diabetes +
+    obesity + hdl, family = binomial, data = data)
 
 Coefficients:
                  Estimate Std. Error z value Pr(>|z|)
-(Intercept)     -4.942039   0.974185  -5.073 3.92e-07 ***
-ldl_high1        1.744782   0.261513   6.672 2.53e-11 ***
-age              0.002870   0.003165   0.907 0.364430
-family_history1  0.830924   0.225588   3.683 0.000230 ***
-hypertension1    0.278261   0.217066   1.282 0.199870
-diabetes1        0.383765   0.264357   1.452 0.146590
-obesity1         0.342875   0.227634   1.506 0.132000
-systolic_bp      0.003628   0.004937   0.735 0.462430
-hdl              0.024119   0.008287   2.910 0.003610 **
-triglycerides   -0.003292   0.002352  -1.400 0.161580
+(Intercept)     -4.954951   0.409262 -12.107  < 2e-16 ***
+ldl_high1        1.726436   0.260265   6.633 3.28e-11 ***
+family_history1  0.831853   0.224523   3.705 0.000211 ***
+diabetes1        0.381846   0.264013   1.446 0.148089
+obesity1         0.340975   0.226124   1.508 0.131577
+hdl              0.031589   0.006489   4.868 1.13e-06 ***
 
 Null deviance: 693.03  on 999  degrees of freedom
-Residual deviance: 594.44  on 990  degrees of freedom
-AIC: 614.44
+Residual deviance: 599.23  on 994  degrees of freedom
+AIC: 611.23
 
-Hosmer-Lemeshow: X-squared = 8.8922, df = 8, p-value = 0.3515
-VIF: all < 2 (max = 1.65)
-AUC model: 0.764 (0.719 - 0.810)
-Nagelkerke R²: 0.188
+LRT full vs reduced: Chi² = 4.788, df = 4, p = 0.3098
+
+Interaction LDL x family_history:
+ldl_high1:family_history1  -0.74038  0.52792  -1.402  0.16078
+LRT interaction: Chi² = 1.988, df = 1, p = 0.1585
+
+Hosmer-Lemeshow: X-squared = 5.6731, df = 8, p-value = 0.6838
+VIF: all < 1.03
+Box-Tidwell HDL: p = 0.961
+Cook's D > 4/n: 77 observations
+AUC final model: 0.760 (0.715 - 0.805)
+AUC full model: 0.764 (0.719 - 0.810)
+DeLong test: Z = -0.738, p = 0.4603
+Nagelkerke R²: 0.179
 ```
